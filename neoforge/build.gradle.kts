@@ -1,5 +1,6 @@
 plugins {
     id("multiloader-loader")
+    id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.neoforge.moddev)
 }
 
@@ -7,6 +8,10 @@ val neoforgeVersion = libs.versions.ext.neoforge.api.get()
 val parchmentMinecraft = libs.versions.ext.parchment.minecraft.get()
 val parchmentVersion = libs.versions.ext.parchment.mappings.get()
 val modId = providers.gradleProperty("mod_id").get()
+
+dependencies {
+    merged(project(":common"))
+}
 
 neoForge {
     version = neoforgeVersion

@@ -1,4 +1,6 @@
 pluginManagement {
+    includeBuild("gradle/multiloader")
+
     repositories {
         gradlePluginPortal()
         mavenCentral()

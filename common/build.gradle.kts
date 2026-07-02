@@ -1,5 +1,6 @@
 plugins {
     id("multiloader-common")
+    id("dev.alexcawl.multiloader.publisher")
     alias(libs.plugins.neoforge.moddev)
 }
 
@@ -25,18 +26,4 @@ dependencies {
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     compileOnly(libs.mixinextras)
     annotationProcessor(libs.mixinextras)
-}
-
-val commonJava by configurations.creating {
-    isCanBeResolved = false
-    isCanBeConsumed = true
-}
-val commonResources by configurations.creating {
-    isCanBeResolved = false
-    isCanBeConsumed = true
-}
-
-artifacts {
-    add(commonJava.name, sourceSets.main.get().java.srcDirs.single())
-    add(commonResources.name, sourceSets.main.get().resources.srcDirs.single())
 }

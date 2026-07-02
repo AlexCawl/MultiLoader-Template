@@ -78,6 +78,7 @@ repositories {
 listOf("apiElements", "runtimeElements", "sourcesElements", "javadocElements").forEach { variant ->
     configurations.named(variant) {
         outgoing {
+            capability("$group:${project.name}:$version")
             capability("$group:${base.archivesName.get()}:$version")
             capability("$group:$modId-${project.name}-$minecraftVersion:$version")
             capability("$group:$modId:$version")

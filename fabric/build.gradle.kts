@@ -1,11 +1,13 @@
 plugins {
     id("multiloader-loader")
+    id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.fabric.loom)
 }
 
 val modId = providers.gradleProperty("mod_id").get()
 
 dependencies {
+    merged(project(":common"))
     minecraft(libs.minecraft)
     mappings(loom.layered {
         officialMojangMappings()

@@ -5,6 +5,7 @@ import org.spongepowered.asm.gradle.plugins.MixinExtension
 
 plugins {
     id("multiloader-loader")
+    id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.forge.gradle)
     alias(libs.plugins.mixin)
 }
@@ -83,6 +84,7 @@ sourceSets.main {
 }
 
 dependencies {
+    merged(project(":common"))
     minecraft(libs.forge.minecraft) {
         version { require("$minecraftVersion-$forgeVersion") }
     }
