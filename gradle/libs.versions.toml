@@ -1,0 +1,38 @@
+[versions]
+ext-java = "21"
+ext-minecraft-current = "1.21.1"
+ext-minecraft-range = "[1.21.1, 1.22)"
+ext-neo-form = "1.21.1-20240808.144430"
+ext-parchment-minecraft = "1.21"
+ext-parchment-mappings = "2024.11.10"
+ext-fabric-api = "0.109.0+1.21.1"
+ext-fabric-loader = "0.16.9"
+ext-forge-api = "52.0.28"
+ext-forge-loader-range = "[52,)"
+ext-neoforge-api = "21.1.80"
+ext-neoforge-loader-range = "[4,)"
+ext-plugin-fabric-loom = "1.8-SNAPSHOT"
+ext-plugin-neoforge-moddev = "2.0.49-beta"
+ext-plugin-forge-gradle = "[6.0.24,6.2)"
+ext-plugin-mixin = "0.7-SNAPSHOT"
+ext-library-mixin = "0.8.5"
+ext-library-mixin-processor = "0.8.5-SNAPSHOT"
+ext-library-mixinextras = "0.3.5"
+ext-library-jopt-simple = { strictly = "5.0.4" }
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "ext-minecraft-current" }
+parchment = { module = "org.parchmentmc.data:parchment-1.21", version.ref = "ext-parchment-mappings" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "ext-fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "ext-fabric-api" }
+mixin-core = { module = "org.spongepowered:mixin", version.ref = "ext-library-mixin" }
+mixin-processor = { module = "org.spongepowered:mixin", version.ref = "ext-library-mixin-processor" }
+mixinextras = { module = "io.github.llamalad7:mixinextras-common", version.ref = "ext-library-mixinextras" }
+forge-minecraft = { module = "net.minecraftforge:forge" }
+jopt-simple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "ext-library-jopt-simple" }
+
+[plugins]
+fabric-loom = { id = "fabric-loom", version.ref = "ext-plugin-fabric-loom" }
+neoforge-moddev = { id = "net.neoforged.moddev", version.ref = "ext-plugin-neoforge-moddev" }
+forge-gradle = { id = "net.minecraftforge.gradle", version.ref = "ext-plugin-forge-gradle" }
+mixin = { id = "org.spongepowered.mixin", version.ref = "ext-plugin-mixin" }

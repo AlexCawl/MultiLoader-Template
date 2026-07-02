@@ -5,20 +5,20 @@ pluginManagement {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = 'Fabric'
-                    url = uri('https://maven.fabricmc.net')
+                    name = "Fabric"
+                    url = uri("https://maven.fabricmc.net")
                 }
             }
             filter {
-                includeGroup('net.fabricmc')
-                includeGroup('fabric-loom')
+                includeGroup("net.fabricmc")
+                includeGroup("fabric-loom")
             }
         }
         exclusiveContent {
             forRepository {
                 maven {
-                    name = 'Sponge'
-                    url = uri('https://repo.spongepowered.org/repository/maven-public')
+                    name = "Sponge"
+                    url = uri("https://repo.spongepowered.org/repository/maven-public")
                 }
             }
             filter {
@@ -28,24 +28,20 @@ pluginManagement {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = 'Forge'
-                    url = uri('https://maven.minecraftforge.net')
+                    name = "Forge"
+                    url = uri("https://maven.minecraftforge.net")
                 }
             }
             filter {
-                includeGroupAndSubgroups('net.minecraftforge')
+                includeGroupAndSubgroups("net.minecraftforge")
             }
         }
     }
 }
 
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
-}
-
 // This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
-rootProject.name = 'MultiLoader-Template'
-include('common')
-include('fabric')
-include('neoforge')
-include('forge')
+rootProject.name = "MultiLoader-Template"
+include("common")
+include("fabric")
+include("neoforge")
+include("forge")
