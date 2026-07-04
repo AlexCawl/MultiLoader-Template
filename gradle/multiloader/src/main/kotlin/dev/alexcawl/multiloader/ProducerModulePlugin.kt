@@ -7,7 +7,7 @@ import org.gradle.api.artifacts.ConsumableConfiguration
 import org.gradle.api.attributes.Usage
 import org.gradle.kotlin.dsl.named
 
-class PublisherModulePlugin : Plugin<Project> {
+class ProducerModulePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.withJavaPlugin {
             java {

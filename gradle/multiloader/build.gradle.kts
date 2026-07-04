@@ -4,9 +4,9 @@ plugins {
 
 gradlePlugin {
     plugins {
-        register("publisher") {
-            id = "dev.alexcawl.multiloader.publisher"
-            implementationClass = "dev.alexcawl.multiloader.PublisherModulePlugin"
+        register("producer") {
+            id = "dev.alexcawl.multiloader.producer"
+            implementationClass = "dev.alexcawl.multiloader.ProducerModulePlugin"
         }
         register("consumer") {
             id = "dev.alexcawl.multiloader.consumer"

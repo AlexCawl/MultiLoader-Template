@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
-    id("dev.alexcawl.multiloader.publisher")
+    id("dev.alexcawl.multiloader.producer")
 }
 
 dependencies {
