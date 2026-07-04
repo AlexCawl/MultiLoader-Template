@@ -20,5 +20,7 @@ build
 
 # other
 eclipse
+
+# debug
 run
 runs
