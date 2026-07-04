@@ -6,11 +6,26 @@ import org.spongepowered.asm.gradle.plugins.MixinExtension
 plugins {
     `java-library`
     `maven-publish`
+    alias(libs.plugins.forge.gradle)
+    alias(libs.plugins.mixin)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
-    alias(libs.plugins.forge.gradle)
-    alias(libs.plugins.mixin)
+}
+
+dependencies {
+    merged(project(":common"))
+    minecraft(libs.forge.minecraft) {
+        version {
+            require("${libs.versions.ext.minecraft.current.get()}-${libs.versions.ext.forge.api.get()}")
+        }
+    }
+    annotationProcessor(variantOf(libs.mixin.processor) {
+        classifier("processor")
+    })
+
+    // Forge's hack fix
+    implementation(libs.jopt.simple)
 }
 
 java {
@@ -118,17 +133,10 @@ sourceSets.main {
     resources.srcDir("src/generated/resources")
 }
 
-dependencies {
-    merged(project(":common"))
-    minecraft(libs.forge.minecraft) {
-        version { require("$minecraftVersion-$forgeVersion") }
-    }
-    annotationProcessor(variantOf(libs.mixin.processor) {
-        classifier("processor")
-    })
-
-    // Forge's hack fix
-    implementation(libs.jopt.simple)
+sourceSets.configureEach {
+    val dir = layout.buildDirectory.dir("sourcesSets/$name")
+    output.setResourcesDir(dir)
+    java.destinationDirectory = dir
 }
 
 publishing {
@@ -144,10 +152,4 @@ publishing {
             System.getenv("local_maven_url")?.let { url = uri(it) }
         }
     }
-}
-
-sourceSets.configureEach {
-    val dir = layout.buildDirectory.dir("sourcesSets/$name")
-    output.setResourcesDir(dir)
-    java.destinationDirectory = dir
 }

@@ -1,9 +1,16 @@
 plugins {
     `java-library`
+    alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.publisher")
-    alias(libs.plugins.neoforge.moddev)
+}
+
+dependencies {
+    compileOnly(libs.mixin.core)
+    // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
+    compileOnly(libs.mixinextras)
+    annotationProcessor(libs.mixinextras)
 }
 
 java {
@@ -49,11 +56,4 @@ neoForge {
         minecraftVersion = parchmentMinecraft
         mappingsVersion = parchmentVersion
     }
-}
-
-dependencies {
-    compileOnly(libs.mixin.core)
-    // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
-    compileOnly(libs.mixinextras)
-    annotationProcessor(libs.mixinextras)
 }

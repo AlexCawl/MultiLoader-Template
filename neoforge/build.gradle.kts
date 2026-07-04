@@ -3,10 +3,14 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     `java-library`
     `maven-publish`
+    alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
-    alias(libs.plugins.neoforge.moddev)
+}
+
+dependencies {
+    merged(project(":common"))
 }
 
 java {
@@ -27,20 +31,6 @@ val description = properties["description"] as String
 
 base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            System.getenv("local_maven_url")?.let { url = uri(it) }
-        }
-    }
 }
 
 metadata {
@@ -69,10 +59,6 @@ metadata {
         "Implementation-Vendor"(modAuthor)
         "Built-On-Minecraft"(minecraftVersion)
     }
-}
-
-dependencies {
-    merged(project(":common"))
 }
 
 neoForge {
@@ -116,4 +102,18 @@ neoForge {
 
 sourceSets.main {
     resources.srcDir("src/generated/resources")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            System.getenv("local_maven_url")?.let { url = uri(it) }
+        }
+    }
 }

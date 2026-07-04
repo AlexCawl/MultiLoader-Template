@@ -3,10 +3,21 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     `java-library`
     `maven-publish`
+    alias(libs.plugins.fabric.loom)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
-    alias(libs.plugins.fabric.loom)
+}
+
+dependencies {
+    merged(project(":common"))
+    minecraft(libs.minecraft)
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment(libs.parchment.get())
+    })
+    modImplementation(libs.fabric.loader)
+    modImplementation(libs.fabric.api)
 }
 
 java {
@@ -23,20 +34,6 @@ val minecraftVersion = libs.versions.ext.minecraft.current.get()
 
 base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            System.getenv("local_maven_url")?.let { url = uri(it) }
-        }
-    }
 }
 
 metadata {
@@ -62,17 +59,6 @@ metadata {
     }
 }
 
-dependencies {
-    merged(project(":common"))
-    minecraft(libs.minecraft)
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment(libs.parchment.get())
-    })
-    modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.api)
-}
-
 loom {
     val aw = project(":common").file("src/main/resources/$modId.accesswidener")
     if (aw.exists()) {
@@ -93,6 +79,20 @@ loom {
             configName = "Fabric Server"
             ideConfigGenerated(true)
             runDir("runs/server")
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            System.getenv("local_maven_url")?.let { url = uri(it) }
         }
     }
 }
