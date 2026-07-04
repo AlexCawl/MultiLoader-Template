@@ -1,11 +1,8 @@
-import net.minecraftforge.gradle.userdev.DependencyManagementExtension
 import net.minecraftforge.gradle.userdev.UserDevExtension
-import org.gradle.api.publish.maven.MavenPublication
 import org.spongepowered.asm.gradle.plugins.MixinExtension
 
 plugins {
     `java-library`
-    `maven-publish`
     alias(libs.plugins.forge.gradle)
     alias(libs.plugins.mixin)
     id("dev.alexcawl.convention.repositories")
@@ -112,19 +109,4 @@ sourceSets.configureEach {
     val dir = layout.buildDirectory.dir("sourcesSets/$name")
     output.setResourcesDir(dir)
     java.destinationDirectory = dir
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-            extensions.getByType<DependencyManagementExtension>().component(this)
-        }
-    }
-    repositories {
-        maven {
-            System.getenv("local_maven_url")?.let { url = uri(it) }
-        }
-    }
 }

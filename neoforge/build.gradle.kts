@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    `maven-publish`
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
@@ -76,20 +75,6 @@ neoForge {
     mods {
         create(modId) {
             sourceSet(sourceSets.main.get())
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            System.getenv("local_maven_url")?.let { url = uri(it) }
         }
     }
 }

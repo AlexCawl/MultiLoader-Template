@@ -1,8 +1,5 @@
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
-    `maven-publish`
     alias(libs.plugins.fabric.loom)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.metadata")
@@ -72,20 +69,6 @@ loom {
             configName = "Fabric Server"
             ideConfigGenerated(true)
             runDir("runs/server")
-        }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            System.getenv("local_maven_url")?.let { url = uri(it) }
         }
     }
 }
