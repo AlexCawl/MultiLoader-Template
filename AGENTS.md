@@ -12,8 +12,7 @@ Run commands from the repository root with the checked-in wrapper:
 - `./gradlew test` runs all configured test tasks (the template currently has no tests).
 - `./gradlew :fabric:runClient` launches a Fabric development client.
 - `./gradlew :neoforge:runClient` launches a NeoForge development client.
-- `./gradlew :forge:Client` launches a Forge development client.
-- `./gradlew :neoforge:runData` regenerates NeoForge data resources.
+- `./gradlew :forge:runClient` launches a Forge development client.
 
 Windows contributors should use `gradlew.bat`. Configure Gradle and the IDE to use JDK 21 before importing the project.
 

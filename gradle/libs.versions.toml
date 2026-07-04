@@ -3,8 +3,6 @@ ext-java = "21"
 ext-minecraft-current = "1.21.1"
 ext-minecraft-range = "[1.21.1, 1.22)"
 ext-neo-form = "1.21.1-20240808.144430"
-ext-parchment-minecraft = "1.21"
-ext-parchment-mappings = "2024.11.10"
 ext-fabric-api = "0.109.0+1.21.1"
 ext-fabric-loader = "0.16.9"
 ext-forge-api = "52.0.28"
@@ -22,7 +20,6 @@ ext-library-jopt-simple = { strictly = "5.0.4" }
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "ext-minecraft-current" }
-parchment = { module = "org.parchmentmc.data:parchment-1.21", version.ref = "ext-parchment-mappings" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "ext-fabric-loader" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "ext-fabric-api" }
 mixin-core = { module = "org.spongepowered:mixin", version.ref = "ext-library-mixin" }

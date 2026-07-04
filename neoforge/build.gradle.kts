@@ -1,5 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
     `maven-publish`
@@ -20,8 +18,6 @@ java {
 val neoforgeVersion = libs.versions.ext.neoforge.api.get()
 val minecraftVersion = libs.versions.ext.minecraft.current.get()
 val minecraftVersionRange = libs.versions.ext.minecraft.range.get()
-val parchmentMinecraft = libs.versions.ext.parchment.minecraft.get()
-val parchmentVersion = libs.versions.ext.parchment.mappings.get()
 val modName = properties["mod_name"] as String
 val modAuthor = properties["mod_author"] as String
 val modId = properties["mod_id"] as String
@@ -68,10 +64,6 @@ neoForge {
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchmentMinecraft
-        mappingsVersion = parchmentVersion
-    }
     runs {
         configureEach {
             systemProperty("neoforge.enabledGameTestNamespaces", modId)
@@ -79,18 +71,11 @@ neoForge {
         }
         create("client") {
             client()
-        }
-        create("data") {
-            data()
-            programArguments.addAll(
-                "--mod", modId,
-                "--all",
-                "--output", file("src/generated/resources/").absolutePath,
-                "--existing", file("src/main/resources/").absolutePath
-            )
+            gameDirectory.set(project.layout.projectDirectory.dir("runs/client"))
         }
         create("server") {
             server()
+            gameDirectory.set(project.layout.projectDirectory.dir("runs/server"))
         }
     }
     mods {
@@ -98,10 +83,6 @@ neoForge {
             sourceSet(sourceSets.main.get())
         }
     }
-}
-
-sourceSets.main {
-    resources.srcDir("src/generated/resources")
 }
 
 publishing {

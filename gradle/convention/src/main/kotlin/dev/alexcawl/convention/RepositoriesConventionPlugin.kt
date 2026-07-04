@@ -24,23 +24,6 @@ class RepositoriesConventionPlugin : Plugin<Project> {
                 }
                 filter { includeGroupAndSubgroups("org.spongepowered") }
             }
-            exclusiveContent {
-                forRepositories(
-                    maven {
-                        name = "ParchmentMC"
-                        url = target.uri("https://maven.parchmentmc.org/")
-                    },
-                    maven {
-                        name = "NeoForge"
-                        url = target.uri("https://maven.neoforged.net/releases")
-                    }
-                )
-                filter { includeGroup("org.parchmentmc.data") }
-            }
-            maven {
-                name = "BlameJared"
-                url = target.uri("https://maven.blamejared.com")
-            }
         }
     }
 }

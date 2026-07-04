@@ -12,10 +12,7 @@ plugins {
 dependencies {
     merged(project(":common"))
     minecraft(libs.minecraft)
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment(libs.parchment.get())
-    })
+    mappings(loom.officialMojangMappings())
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.api)
 }

@@ -98,7 +98,6 @@ configure<UserDevExtension> {
         create("client") {
             workingDirectory(file("runs/client"))
             ideaModule = "${rootProject.name}.${project.name}.main"
-            taskName = "Client"
             mods {
                 create("modClientRun") {
                     source(sourceSets.main.get())
@@ -108,29 +107,13 @@ configure<UserDevExtension> {
         create("server") {
             workingDirectory(file("runs/server"))
             ideaModule = "${rootProject.name}.${project.name}.main"
-            taskName = "Server"
             mods {
                 create("modServerRun") {
                     source(sourceSets.main.get())
                 }
             }
         }
-        create("data") {
-            workingDirectory(file("runs/data"))
-            ideaModule = "${rootProject.name}.${project.name}.main"
-            args("--mod", modId, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/"))
-            taskName = "Data"
-            mods {
-                create("modDataRun") {
-                    source(sourceSets.main.get())
-                }
-            }
-        }
     }
-}
-
-sourceSets.main {
-    resources.srcDir("src/generated/resources")
 }
 
 sourceSets.configureEach {

@@ -22,8 +22,6 @@ val modAuthor = properties["mod_author"] as String
 val modId = properties["mod_id"] as String
 val minecraftVersion = libs.versions.ext.minecraft.current.get()
 val configuredNeoFormVersion = libs.versions.ext.neo.form.get()
-val parchmentMinecraft = libs.versions.ext.parchment.minecraft.get()
-val parchmentVersion = libs.versions.ext.parchment.mappings.get()
 
 base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
@@ -51,9 +49,5 @@ neoForge {
     val at = file("src/main/resources/META-INF/accesstransformer.cfg")
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
-    }
-    parchment {
-        minecraftVersion = parchmentMinecraft
-        mappingsVersion = parchmentVersion
     }
 }
