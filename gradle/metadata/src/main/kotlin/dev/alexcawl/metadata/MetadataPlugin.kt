@@ -26,15 +26,14 @@ class MetadataPlugin : Plugin<Project> {
     }
 
     private fun resolveProperties(block: MetadataExtension.Scope.() -> Unit): Map<String, Any> {
-        return buildMap {
-            val map: MutableMap<String, Any> = this
-            val scope: MetadataExtension.Scope = object : MetadataExtension.Scope {
-                override operator fun String.invoke(value: Any) {
-                    map[this] = value
-                }
+        val map: MutableMap<String, Any> = linkedMapOf()
+        val scope: MetadataExtension.Scope = object : MetadataExtension.Scope {
+            override operator fun String.invoke(value: Any) {
+                map[this] = value
             }
-            scope.block()
         }
+        scope.block()
+        return map
     }
 
     private fun Project.expandProperties(patterns: List<String>, properties: Map<String, Any>) {
