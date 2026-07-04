@@ -27,6 +27,9 @@ mixin-processor = { module = "org.spongepowered:mixin", version.ref = "ext-libra
 mixinextras = { module = "io.github.llamalad7:mixinextras-common", version.ref = "ext-library-mixinextras" }
 forge-minecraft = { module = "net.minecraftforge:forge" }
 jopt-simple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "ext-library-jopt-simple" }
+fabric-loom-gradle-plugin = { module = "net.fabricmc:fabric-loom", version.ref = "ext-plugin-fabric-loom" }
+neoforge-moddev-gradle-plugin = { module = "net.neoforged:moddev-gradle", version.ref = "ext-plugin-neoforge-moddev" }
+forge-gradle-plugin = { module = "net.minecraftforge.gradle:ForgeGradle", version.ref = "ext-plugin-forge-gradle" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "ext-plugin-fabric-loom" }
