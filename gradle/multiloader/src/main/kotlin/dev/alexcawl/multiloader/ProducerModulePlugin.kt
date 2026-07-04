@@ -7,6 +7,8 @@ import org.gradle.api.artifacts.ConsumableConfiguration
 import org.gradle.api.attributes.Usage
 import org.gradle.kotlin.dsl.named
 
+private const val ACCESS_TRANSFORMER_PATH = "src/main/resources/META-INF/accesstransformer.cfg"
+
 class ProducerModulePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.withJavaPlugin {
@@ -26,6 +28,19 @@ class ProducerModulePlugin : Plugin<Project> {
                 outgoing.artifacts(
                     mainSourceSet.flatMap { it.resources.sourceDirectories.elements }
                 )
+            }
+        }
+        target.configureNeoforgeAccessTransformer()
+    }
+
+    private fun Project.configureNeoforgeAccessTransformer() {
+        withNeoforgePlugin {
+            neoforge {
+                // Automatically enable AccessTransformers if the file exists
+                val accessTransformer = file(ACCESS_TRANSFORMER_PATH)
+                if (accessTransformer.exists()) {
+                    accessTransformers.from(accessTransformer.absolutePath)
+                }
             }
         }
     }

@@ -86,14 +86,6 @@ configure<UserDevExtension> {
     copyIdeResources = true // Calls processResources when in dev
     reobf = false // Forge 1.20.6+ uses official mappings at runtime, so we shouldn't reobf from official to SRG
 
-    // Automatically enable forge AccessTransformers if the file exists.
-    // This location is hardcoded in Forge and can not be changed.
-    // Forge still uses SRG names during compile time, so we cannot use the common AT's.
-    val at = file("src/main/resources/META-INF/accesstransformer.cfg")
-    if (at.exists()) {
-        accessTransformer(at)
-    }
-
     runs {
         create("client") {
             workingDirectory(file("runs/client"))

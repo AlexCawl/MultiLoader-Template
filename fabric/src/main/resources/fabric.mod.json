@@ -23,6 +23,7 @@
         "${mod_id}.mixins.json",
         "${mod_id}.fabric.mixins.json"
     ],
+    "accessWidener": "accesswidener",
     "depends": {
         "fabricloader": ">=${fabric_loader_version}",
         "fabric-api": "*",
@@ -33,4 +34,3 @@
         "another-mod": "*"
     }
 }
-  

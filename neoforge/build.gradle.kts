@@ -59,11 +59,6 @@ metadata {
 
 neoForge {
     version = neoforgeVersion
-    // Automatically enable neoforge AccessTransformers if the file exists
-    val at = project(":common").file("src/main/resources/META-INF/accesstransformer.cfg")
-    if (at.exists()) {
-        accessTransformers.from(at.absolutePath)
-    }
     runs {
         configureEach {
             systemProperty("neoforge.enabledGameTestNamespaces", modId)
