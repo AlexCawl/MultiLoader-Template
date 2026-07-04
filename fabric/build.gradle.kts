@@ -1,10 +1,66 @@
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
-    id("multiloader-loader")
+    `java-library`
+    `maven-publish`
+    id("dev.alexcawl.convention.repositories")
+    id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.fabric.loom)
 }
 
-val modId = providers.gradleProperty("mod_id").get()
+java {
+    toolchain.languageVersion.set(libs.versions.ext.java.map { JavaLanguageVersion.of(it.toInt()) })
+}
+
+val modName = properties["mod_name"] as String
+val modAuthor = properties["mod_author"] as String
+val modId = properties["mod_id"] as String
+val modLicense = properties["license"] as String
+val description = properties["description"] as String
+val javaVersion = libs.versions.ext.java.get()
+val minecraftVersion = libs.versions.ext.minecraft.current.get()
+
+base {
+    archivesName = "$modId-${project.name}-$minecraftVersion"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            System.getenv("local_maven_url")?.let { url = uri(it) }
+        }
+    }
+}
+
+metadata {
+    resources("pack.mcmeta", "fabric.mod.json", "*.mixins.json") {
+        "version"(version)
+        "minecraft_version"(minecraftVersion)
+        "fabric_loader_version"(libs.versions.ext.fabric.loader.get())
+        "mod_name"(modName)
+        "mod_author"(modAuthor)
+        "mod_id"(modId)
+        "license"(modLicense)
+        "description"(description)
+        "java_version"(javaVersion)
+    }
+    jarManifest {
+        "Specification-Title"(modName)
+        "Specification-Vendor"(modAuthor)
+        "Specification-Version"(version)
+        "Implementation-Title"(project.name)
+        "Implementation-Version"(version)
+        "Implementation-Vendor"(modAuthor)
+        "Built-On-Minecraft"(minecraftVersion)
+    }
+}
 
 dependencies {
     merged(project(":common"))

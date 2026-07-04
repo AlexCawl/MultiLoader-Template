@@ -4,30 +4,65 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.spongepowered.asm.gradle.plugins.MixinExtension
 
 plugins {
-    id("multiloader-loader")
+    `java-library`
+    `maven-publish`
+    id("dev.alexcawl.convention.repositories")
+    id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.forge.gradle)
     alias(libs.plugins.mixin)
 }
 
-val modName = providers.gradleProperty("mod_name").get()
-val modId = providers.gradleProperty("mod_id").get()
+java {
+    toolchain.languageVersion.set(libs.versions.ext.java.map { JavaLanguageVersion.of(it.toInt()) })
+}
+
+val modName = properties["mod_name"] as String
+val modAuthor = properties["mod_author"] as String
+val modId = properties["mod_id"] as String
+val modLicense = properties["license"] as String
+val credits = properties["credits"] as String
+val description = properties["description"] as String
 val minecraftVersion = libs.versions.ext.minecraft.current.get()
+val minecraftVersionRange = libs.versions.ext.minecraft.range.get()
 val forgeVersion = libs.versions.ext.forge.api.get()
 
 base {
-    archivesName = "$modName-forge-$minecraftVersion"
+    archivesName = "$modId-${project.name}-$minecraftVersion"
+}
+
+metadata {
+    resources("META-INF/mods.toml") {
+        "version"(version)
+        "minecraft_version_range"(minecraftVersionRange)
+        "forge_version"(forgeVersion)
+        "forge_loader_version_range"(libs.versions.ext.forge.loader.range.get())
+        "mod_name"(modName)
+        "mod_author"(modAuthor)
+        "mod_id"(modId)
+        "license"(modLicense)
+        "description"(description)
+        "credits"(credits)
+    }
+    resources("pack.mcmeta", "*.mixins.json") {
+        "mod_name"(modName)
+        "mod_id"(modId)
+    }
+    jarManifest {
+        "Specification-Title"(modName)
+        "Specification-Vendor"(modAuthor)
+        "Specification-Version"(version)
+        "Implementation-Title"(project.name)
+        "Implementation-Version"(version)
+        "Implementation-Vendor"(modAuthor)
+        "Built-On-Minecraft"(minecraftVersion)
+        "MixinConfigs"("$modId.mixins.json,$modId.forge.mixins.json")
+    }
 }
 
 configure<MixinExtension> {
     config("$modId.mixins.json")
     config("$modId.forge.mixins.json")
-}
-
-tasks.jar {
-    manifest {
-        attributes["MixinConfigs"] = "$modId.mixins.json,$modId.forge.mixins.json"
-    }
 }
 
 configure<UserDevExtension> {
@@ -98,8 +133,15 @@ dependencies {
 
 publishing {
     publications {
-        named<MavenPublication>("mavenJava") {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
             extensions.getByType<DependencyManagementExtension>().component(this)
+        }
+    }
+    repositories {
+        maven {
+            System.getenv("local_maven_url")?.let { url = uri(it) }
         }
     }
 }

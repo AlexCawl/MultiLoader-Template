@@ -1,12 +1,42 @@
 plugins {
-    id("multiloader-common")
+    `java-library`
+    id("dev.alexcawl.convention.repositories")
+    id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.publisher")
     alias(libs.plugins.neoforge.moddev)
 }
 
+java {
+    toolchain.languageVersion.set(libs.versions.ext.java.map { JavaLanguageVersion.of(it.toInt()) })
+}
+
+val modName = properties["mod_name"] as String
+val modAuthor = properties["mod_author"] as String
+val modId = properties["mod_id"] as String
+val minecraftVersion = libs.versions.ext.minecraft.current.get()
 val configuredNeoFormVersion = libs.versions.ext.neo.form.get()
 val parchmentMinecraft = libs.versions.ext.parchment.minecraft.get()
 val parchmentVersion = libs.versions.ext.parchment.mappings.get()
+
+base {
+    archivesName = "$modId-${project.name}-$minecraftVersion"
+}
+
+metadata {
+    resources("pack.mcmeta", "*.mixins.json") {
+        "mod_name"(modName)
+        "mod_id"(modId)
+    }
+    jarManifest {
+        "Specification-Title"(modName)
+        "Specification-Vendor"(modAuthor)
+        "Specification-Version"(version)
+        "Implementation-Title"(project.name)
+        "Implementation-Version"(version)
+        "Implementation-Vendor"(modAuthor)
+        "Built-On-Minecraft"(minecraftVersion)
+    }
+}
 
 neoForge {
     neoFormVersion = configuredNeoFormVersion

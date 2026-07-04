@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 21 Gradle multi-project template for Minecraft 1.21.1. Put loader-independent code in `common/src/main/java` and shared resources, mixin configuration, and access transformers in `common/src/main/resources`. Loader entry points and integrations belong in `fabric/`, `forge/`, or `neoforge/`, each using the standard `src/main/java` and `src/main/resources` layout. Keep the service interfaces in `common` and their implementations plus `META-INF/services` registrations in each loader module. Shared Gradle conventions live in `buildSrc/src/main/kotlin`; dependency and platform versions are centralized in `gradle/libs.versions.toml`, while mod metadata remains in `gradle.properties`.
+This is a Java 21 Gradle multi-project template for Minecraft 1.21.1. Put loader-independent code in `common/src/main/java` and shared resources, mixin configuration, and access transformers in `common/src/main/resources`. Loader entry points and integrations belong in `fabric/`, `forge/`, or `neoforge/`, each using the standard `src/main/java` and `src/main/resources` layout. Keep the service interfaces in `common` and their implementations plus `META-INF/services` registrations in each loader module. Shared Gradle conventions live in the `gradle/convention` included build, while metadata expansion lives in `gradle/metadata`; dependency and platform versions are centralized in `gradle/libs.versions.toml`, while mod metadata remains in `gradle.properties`.
 
 ## Build, Test, and Development Commands
 

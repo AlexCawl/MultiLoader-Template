@@ -10,6 +10,10 @@ import org.gradle.kotlin.dsl.named
 class PublisherModulePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.withJavaPlugin {
+            java {
+                withJavadocJar()
+                withSourcesJar()
+            }
             val mainSourceSet = target.mainSourceSet()
             val mergedJavaElements = target.mergedJavaElements()
             val mergedResourceElements = target.mergedResourceElements()

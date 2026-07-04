@@ -1,4 +1,6 @@
 pluginManagement {
+    includeBuild("gradle/convention")
+    includeBuild("gradle/metadata")
     includeBuild("gradle/multiloader")
 
     repositories {

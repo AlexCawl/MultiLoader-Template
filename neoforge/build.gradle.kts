@@ -1,13 +1,75 @@
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
-    id("multiloader-loader")
+    `java-library`
+    `maven-publish`
+    id("dev.alexcawl.convention.repositories")
+    id("dev.alexcawl.metadata")
     id("dev.alexcawl.multiloader.consumer")
     alias(libs.plugins.neoforge.moddev)
 }
 
+java {
+    toolchain.languageVersion.set(libs.versions.ext.java.map { JavaLanguageVersion.of(it.toInt()) })
+}
+
 val neoforgeVersion = libs.versions.ext.neoforge.api.get()
+val minecraftVersion = libs.versions.ext.minecraft.current.get()
+val minecraftVersionRange = libs.versions.ext.minecraft.range.get()
 val parchmentMinecraft = libs.versions.ext.parchment.minecraft.get()
 val parchmentVersion = libs.versions.ext.parchment.mappings.get()
-val modId = providers.gradleProperty("mod_id").get()
+val modName = properties["mod_name"] as String
+val modAuthor = properties["mod_author"] as String
+val modId = properties["mod_id"] as String
+val modLicense = properties["license"] as String
+val credits = properties["credits"] as String
+val description = properties["description"] as String
+
+base {
+    archivesName = "$modId-${project.name}-$minecraftVersion"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            System.getenv("local_maven_url")?.let { url = uri(it) }
+        }
+    }
+}
+
+metadata {
+    resources("META-INF/neoforge.mods.toml") {
+        "version"(version)
+        "minecraft_version_range"(minecraftVersionRange)
+        "neoforge_version"(neoforgeVersion)
+        "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range.get())
+        "mod_name"(modName)
+        "mod_author"(modAuthor)
+        "mod_id"(modId)
+        "license"(modLicense)
+        "description"(description)
+        "credits"(credits)
+    }
+    resources("pack.mcmeta", "*.mixins.json") {
+        "mod_name"(modName)
+        "mod_id"(modId)
+    }
+    jarManifest {
+        "Specification-Title"(modName)
+        "Specification-Vendor"(modAuthor)
+        "Specification-Version"(version)
+        "Implementation-Title"(project.name)
+        "Implementation-Version"(version)
+        "Implementation-Vendor"(modAuthor)
+        "Built-On-Minecraft"(minecraftVersion)
+    }
+}
 
 dependencies {
     merged(project(":common"))
