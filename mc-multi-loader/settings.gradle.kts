@@ -1,0 +1,22 @@
+rootProject.name = "mc-multi-loader"
+include("common")
+include("fabric")
+include("neoforge")
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven("https://maven.fabricmc.net")
+        maven("https://maven.neoforged.net/releases")
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven("https://maven.fabricmc.net")
+        maven("https://maven.neoforged.net/releases")
+    }
+}
