@@ -18,7 +18,7 @@ class FabricPlugin : Plugin<Project> {
             val loom = target.extensions.getByType(LoomGradleExtensionAPI::class.java)
             loom.mixin.useLegacyMixinAp.set(false)
             val accessWidenerFile = target.providers.provider {
-                accessWidener.incoming.artifactView { isLenient = true }.files.files.singleOrNull()
+                accessWidener.get().incoming.artifactView { isLenient = true }.files.files.singleOrNull()
             }
             loom.accessWidenerPath.fileProvider(accessWidenerFile)
         }

@@ -29,6 +29,8 @@ Use typed `plugins.withType(...)` integration hooks instead of string-based `plu
 
 Each loader module declares exactly one direct `merged` project or Maven module dependency. `merged` extends `implementation`; transitive dependencies stay on classpaths, while only the direct common artifact is embedded. Do not add file dependencies or multiple direct dependencies.
 
+Create custom configurations with role-locked lazy factories: `dependencyScope`, `resolvable`, or `consumable`. Preserve providers through plugin internals and avoid `configurations.create` plus mutable role flags.
+
 Configure resource expansion and JAR manifest attributes through the independent `mcMultiLoaderMetadata` extension. The plugin intentionally does not validate JSON/TOML, placeholder completeness, mixin registration, or AW/AT manifest references. Keep loader manifests explicit.
 
 Common may publish one Fabric AW and one NeoForge AT through `fabricAccessWidener` and `neoForgeAccessTransformer`. Fabric uses Loom static mixin remapping without refmaps or the legacy Mixin AP. Datagen remains native to each loader module.

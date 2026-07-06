@@ -1,10 +1,13 @@
 package dev.alexcawl.mcmultiloader
 
 import org.gradle.api.GradleException
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencyScopeConfiguration
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.ResolvableConfiguration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.DocsType
@@ -20,8 +23,8 @@ internal val ACCESS_FILE_ATTRIBUTE: Attribute<String> =
     Attribute.of("dev.alexcawl.mcmultiloader.access-file", String::class.java)
 
 data class ConsumerModel(
-    val merged: Configuration,
-    val mergedArtifact: Configuration
+    val merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
+    val mergedArtifact: NamedDomainObjectProvider<ResolvableConfiguration>
 )
 
 internal fun Project.createBaseExtension(): McMultiLoaderExtension {
@@ -35,16 +38,12 @@ internal fun Project.createBaseExtension(): McMultiLoaderExtension {
 
 fun Project.createConsumerModel(): ConsumerModel {
     createBaseExtension()
-    val merged = configurations.create("merged") {
-        isCanBeConsumed = false
-        isCanBeResolved = false
+    val merged = configurations.dependencyScope("merged") {
         description = "The single common module merged into this loader artifact."
     }
-    val mergedArtifact = configurations.create("mergedArtifact") {
-        isCanBeConsumed = false
-        isCanBeResolved = true
+    val mergedArtifact = configurations.resolvable("mergedArtifact") {
         isTransitive = false
-        extendsFrom(merged)
+        extendsFrom(merged.get())
         attributes {
             attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
             attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.LIBRARY))
@@ -52,12 +51,12 @@ fun Project.createConsumerModel(): ConsumerModel {
     }
 
     val commonTrees = providers.provider {
-        requireSingleMergedDependency(merged)
-        mergedArtifact.files.map(::zipTree)
+        requireSingleMergedDependency(merged.get())
+        mergedArtifact.get().files.map(::zipTree)
     }
     plugins.withType(JavaPlugin::class.java).configureEach {
         configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME) {
-            extendsFrom(merged)
+            extendsFrom(merged.get())
         }
         tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, ProcessResources::class.java) {
             dependsOn(mergedArtifact)
@@ -79,9 +78,7 @@ internal fun Project.createAccessFileElements(
     kind: String,
     resourcePath: Property<String>
 ) {
-    val elements = configurations.create(name) {
-        isCanBeConsumed = true
-        isCanBeResolved = false
+    val elements = configurations.consumable(name) {
         attributes {
             attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
             attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.DOCUMENTATION))
@@ -94,7 +91,7 @@ internal fun Project.createAccessFileElements(
     }
 
     (components.getByName("java") as AdhocComponentWithVariants)
-        .addVariantsFromConfiguration(elements) {
+        .addVariantsFromConfiguration(elements.get()) {
             mapToOptional()
         }
 }
@@ -103,11 +100,9 @@ fun Project.createAccessFileResolver(
     model: ConsumerModel,
     name: String,
     kind: String
-): Configuration = configurations.create(name) {
-    isCanBeConsumed = false
-    isCanBeResolved = true
+): NamedDomainObjectProvider<ResolvableConfiguration> = configurations.resolvable(name) {
     isTransitive = false
-    extendsFrom(model.merged)
+    extendsFrom(model.merged.get())
     attributes {
         attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
         attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.DOCUMENTATION))
