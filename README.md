@@ -1,27 +1,103 @@
 # MultiLoader Template
 
-This project provides a Gradle project template that can compile Minecraft mods for multiple modloaders using a common project for the sources. This project does not require any third party libraries or dependencies. If you have any questions or want to discuss the project, please join our [Discord](https://discord.myceliummod.network).
+Gradle template for Minecraft 1.21.1 mods targeting Fabric and NeoForge from one shared codebase. The project uses Java 21, Mojang mappings, Fabric Loom, ModDevGradle, and the included `mc-multi-loader` plugin build.
 
-## Getting Started
+## Project layout
 
-### IntelliJ IDEA
-This guide will show how to import the MultiLoader Template into IntelliJ IDEA. The setup process is roughly equivalent to setting up the modloaders independently and should be very familiar to anyone who has worked with their MDKs.
+```text
+common/                 loader-independent code and resources
+fabric/                 Fabric entry points and integrations
+neoforge/               NeoForge entry points and integrations
+mc-multi-loader/        Gradle plugins used by the three modules
+gradle/convention/      shared repository conventions
+gradle/libs.versions.toml
+gradle.properties       mod metadata
+```
 
-1. Clone or download this repository to your computer.
-2. Configure the project metadata in `gradle.properties` and dependency and platform versions in `gradle/libs.versions.toml`. You will also need to change the `rootProject.name` property in `settings.gradle.kts`; this should match the folder name of your project, or else IDEA may complain.
-3. Open the template's root folder as a new project in IDEA. This is the folder that contains this README.md file and the gradlew executable.
-4. If your default JVM/JDK is not Java 21 you will encounter an error when opening the project. This error is fixed by going to `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JVM` and changing the value to a valid Java 21 JVM. You will also need to set the Project SDK to Java 21. This can be done by going to `File > Project Structure > Project SDK`. Once both have been set open the Gradle tab in IDEA and click the refresh button to reload the project.
-5. Open your Run/Debug Configurations. Under the `Application` category there should now be options to run Fabric and NeoForge projects. Select one of the client options and try to run it.
-6. Assuming you were able to run the game in step 5 your workspace should now be set up.
+The included plugin build is split by loader. A project only loads the implementation it applies:
 
-### Eclipse
-While it is possible to use this template in Eclipse it is not recommended. During the development of this template multiple critical bugs and quirks related to Eclipse were found at nearly every level of the required build tools. While we continue to work with these tools to report and resolve issues support for projects like these are not there yet. For now Eclipse is considered unsupported by this project. The development cycle for build tools is notoriously slow so there are no ETAs available.
+- `dev.alexcawl.mcmultiloader.common`
+- `dev.alexcawl.mcmultiloader.fabric`
+- `dev.alexcawl.mcmultiloader.neoforge`
 
-## Development Guide
-When using this template the majority of your mod should be developed in the `common` project. The `common` project is compiled against the vanilla game and is used to hold code that is shared between the different loader-specific versions of your mod. The `common` project has no knowledge or access to ModLoader specific code, apis, or concepts. Code that requires something from a specific loader must be done through the project that is specific to that loader, such as the `fabric` or `neoforge` projects.
+## Getting started
 
-Loader specific projects such as the `fabric` and `neoforge` project are used to load the `common` project into the game. These projects also define code that is specific to that loader. Loader specific projects can access all the code in the `common` project. It is important to remember that the `common` project can not access code from loader specific projects.
+1. Clone the repository.
+2. Set the mod ID, name, version, package, authors, and other metadata in `gradle.properties`.
+3. Update Minecraft, loader, API, and Gradle plugin versions in `gradle/libs.versions.toml`.
+4. Rename the example Java packages, resource files, mixin configs, service declarations, and `rootProject.name` consistently.
+5. Import the repository root into IntelliJ IDEA with JDK 21 selected for both the project SDK and Gradle JVM.
+6. Reload Gradle and run either the Fabric or NeoForge client configuration.
 
-## Supported Loaders
+Eclipse is not supported.
 
-The template targets Fabric and NeoForge. Loader-specific code lives in the corresponding subproject while reusable code and resources live in `common`.
+## Architecture
+
+Most code belongs in `common`. It may use Minecraft, Mixin, and loader-independent libraries, but it must not reference Fabric or NeoForge APIs. Loader-specific entry points, event handling, integrations, and service implementations belong in their respective modules.
+
+Each loader module declares one common artifact:
+
+```kotlin
+dependencies {
+    merged(project(":common"))
+}
+```
+
+`merged` also accepts a normal Maven module dependency. It behaves like `implementation` for compile and runtime classpaths, while only the direct common JAR is merged into the final loader JAR. File dependencies and multiple direct `merged` dependencies are not supported.
+
+Common classes and resources are processed together with loader output. Fabric Loom therefore remaps common and Fabric classes in one pass; NeoForge packages the same common output through ModDevGradle.
+
+## Resources and metadata
+
+Resource expansion is configured per file:
+
+```kotlin
+mcMultiLoader {
+    resourceTemplates {
+        loaderManifest("fabric.mod.json") {
+            "version"(project.version)
+            "mod_id"(providers.gradleProperty("mod_id"))
+        }
+        mixinConfig("examplemod.fabric.mixins.json") {}
+        template("pack.mcmeta") {
+            "mod_name"(providers.gradleProperty("mod_name"))
+        }
+    }
+    jarManifest {
+        "Implementation-Version"(project.version)
+    }
+}
+```
+
+The plugin expands declared files but does not generate or validate Fabric JSON, NeoForge TOML, mixin declarations, or placeholders. Loader manifests remain explicit source files.
+
+The common module may declare one Fabric access widener and one NeoForge access transformer:
+
+```kotlin
+mcMultiLoader {
+    fabricAccessWidener.set("accesswidener")
+    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
+}
+```
+
+The common plugin publishes these files through dedicated Gradle variants. The Fabric and NeoForge plugins wire the matching variant into Loom or ModDevGradle. Manifests must still reference the resource paths explicitly.
+
+Fabric mixins use Loom static remapping. Refmaps, the legacy Mixin annotation processor, and `loom.mixin` are not used.
+
+## Commands
+
+Run commands from the repository root:
+
+```shell
+./gradlew build
+./gradlew test
+./gradlew :fabric:runClient
+./gradlew :neoforge:runClient
+./gradlew :fabric:runDatagen
+./gradlew :neoforge:runData
+./gradlew -p mc-multi-loader check
+```
+
+Generated data is written to each loader module's `src/generated/resources` directory. Datagen is configured natively per loader; `mc-multi-loader` does not create a shared datagen abstraction.
+
+The plugin design and MVP boundaries are documented in [RFC 0001](docs/rfcs/0001-mc-multi-loader.md).
