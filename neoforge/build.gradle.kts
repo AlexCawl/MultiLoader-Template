@@ -2,8 +2,7 @@ plugins {
     `java-library`
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
-    id("dev.alexcawl.metadata")
-    id("dev.alexcawl.multiloader.consumer")
+    id("dev.alexcawl.mcmultiloader.neoforge")
 }
 
 dependencies {
@@ -28,23 +27,23 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-metadata {
-    resources("META-INF/neoforge.mods.toml") {
-        "version"(version)
-        "minecraft_version_range"(minecraftVersionRange)
-        "neoforge_version"(neoforgeVersion)
-        "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range.get())
-        "mod_name"(modName)
-        "mod_author"(modAuthor)
-        "mod_id"(modId)
-        "license"(modLicense)
-        "description"(description)
-        "credits"(credits)
+mcMultiLoader {
+    resourceTemplates {
+        loaderManifest("META-INF/neoforge.mods.toml") {
+            "version"(version)
+            "minecraft_version_range"(minecraftVersionRange)
+            "neoforge_version"(neoforgeVersion)
+            "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range)
+            "mod_name"(modName)
+            "mod_author"(modAuthor)
+            "mod_id"(modId)
+            "license"(modLicense)
+            "description"(description)
+            "credits"(credits)
+        }
+        mixinConfig("$modId.neoforge.mixins.json") {}
     }
-    resources("pack.mcmeta", "*.mixins.json") {
-        "mod_name"(modName)
-        "mod_id"(modId)
-    }
+
     jarManifest {
         "Specification-Title"(modName)
         "Specification-Vendor"(modAuthor)
@@ -71,10 +70,25 @@ neoForge {
             server()
             gameDirectory.set(project.layout.projectDirectory.dir("runs/server"))
         }
+        create("data") {
+            data()
+            gameDirectory.set(project.layout.projectDirectory.dir("runs/datagen"))
+            programArgument("--mod")
+            programArgument(modId)
+            programArgument("--all")
+            programArgument("--output")
+            programArgument(file("src/generated/resources").absolutePath)
+            programArgument("--existing")
+            programArgument(file("src/main/resources").absolutePath)
+        }
     }
     mods {
         create(modId) {
             sourceSet(sourceSets.main.get())
         }
     }
+}
+
+sourceSets.main {
+    resources.srcDir("src/generated/resources")
 }

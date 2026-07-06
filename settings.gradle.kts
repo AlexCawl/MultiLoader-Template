@@ -1,7 +1,6 @@
 pluginManagement {
     includeBuild("gradle/convention")
-    includeBuild("gradle/metadata")
-    includeBuild("gradle/multiloader")
+    includeBuild("mc-multi-loader")
 
     repositories {
         gradlePluginPortal()
@@ -18,28 +17,6 @@ pluginManagement {
                 includeGroup("fabric-loom")
             }
         }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "Sponge"
-                    url = uri("https://repo.spongepowered.org/repository/maven-public")
-                }
-            }
-            filter {
-                includeGroupAndSubgroups("org.spongepowered")
-            }
-        }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "Forge"
-                    url = uri("https://maven.minecraftforge.net")
-                }
-            }
-            filter {
-                includeGroupAndSubgroups("net.minecraftforge")
-            }
-        }
     }
 }
 
@@ -48,4 +25,3 @@ rootProject.name = "MultiLoader-Template"
 include("common")
 include("fabric")
 include("neoforge")
-include("forge")

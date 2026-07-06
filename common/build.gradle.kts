@@ -2,8 +2,7 @@ plugins {
     `java-library`
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
-    id("dev.alexcawl.metadata")
-    id("dev.alexcawl.multiloader.producer")
+    id("dev.alexcawl.mcmultiloader.common")
 }
 
 dependencies {
@@ -27,11 +26,19 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-metadata {
-    resources("pack.mcmeta", "*.mixins.json") {
-        "mod_name"(modName)
-        "mod_id"(modId)
+mcMultiLoader {
+    resourceTemplates {
+        template("pack.mcmeta") {
+            "mod_name"(modName)
+        }
+        mixinConfig("$modId.mixins.json") {
+            "mod_id"(modId)
+        }
     }
+
+    fabricAccessWidener.set("accesswidener")
+    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
+
     jarManifest {
         "Specification-Title"(modName)
         "Specification-Vendor"(modAuthor)

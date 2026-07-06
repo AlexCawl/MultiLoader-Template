@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 21 Gradle multi-project template for Minecraft 1.21.1. Put loader-independent code in `common/src/main/java` and shared resources, mixin configuration, and access transformers in `common/src/main/resources`. Loader entry points and integrations belong in `fabric/`, `forge/`, or `neoforge/`, each using the standard `src/main/java` and `src/main/resources` layout. Keep the service interfaces in `common` and their implementations plus `META-INF/services` registrations in each loader module. Shared Gradle conventions live in the `gradle/convention` included build, while metadata expansion lives in `gradle/metadata`; dependency and platform versions are centralized in `gradle/libs.versions.toml`, while mod metadata remains in `gradle.properties`.
+This is a Java 21 Gradle multi-project template for Minecraft 1.21.1. Put loader-independent code in `common/src/main/java` and shared resources, mixin configuration, and access transformers in `common/src/main/resources`. Loader entry points and integrations belong in `fabric/` or `neoforge/`, each using the standard `src/main/java` and `src/main/resources` layout. Keep the service interfaces in `common` and their implementations plus `META-INF/services` registrations in each loader module. Shared Gradle conventions live in the `gradle/convention` included build, while common merging and metadata expansion live in root `mc-multi-loader` included build; dependency and platform versions are centralized in `gradle/libs.versions.toml`, while mod metadata remains in `gradle.properties`.
 
 ## Build, Test, and Development Commands
 
@@ -12,7 +12,6 @@ Run commands from the repository root with the checked-in wrapper:
 - `./gradlew test` runs all configured test tasks (the template currently has no tests).
 - `./gradlew :fabric:runClient` launches a Fabric development client.
 - `./gradlew :neoforge:runClient` launches a NeoForge development client.
-- `./gradlew :forge:runClient` launches a Forge development client.
 
 Windows contributors should use `gradlew.bat`. Configure Gradle and the IDE to use JDK 21 before importing the project.
 
@@ -26,4 +25,4 @@ Add tests under `<module>/src/test/java`, mirroring the production package, and 
 
 ## Commit & Pull Request Guidelines
 
-Follow Conventional Commits using `<type>(<scope>): <description>`. Use lowercase types such as `feat`, `fix`, `docs`, `build`, or `chore`; use a loader or module as the optional scope, for example `fix(forge): resolve patched macOS LWJGL dependency`. Write imperative descriptions, keep each commit to one concern, and mark incompatible changes with `!` plus a `BREAKING CHANGE:` footer. Pull requests should explain the change, identify affected loaders and Minecraft versions, link issues, and list validation. Include screenshots only for visible changes. Do not commit build output, IDE files, or local `runs/` directories.
+Follow Conventional Commits using `<type>(<scope>): <description>`. Use lowercase types such as `feat`, `fix`, `docs`, `build`, or `chore`; use a loader or module as the optional scope, for example `fix(fabric): correct remapped dependency wiring`. Write imperative descriptions, keep each commit to one concern, and mark incompatible changes with `!` plus a `BREAKING CHANGE:` footer. Pull requests should explain the change, identify affected loaders and Minecraft versions, link issues, and list validation. Include screenshots only for visible changes. Do not commit build output, IDE files, or local `runs/` directories.

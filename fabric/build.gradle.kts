@@ -2,8 +2,7 @@ plugins {
     `java-library`
     alias(libs.plugins.fabric.loom)
     id("dev.alexcawl.convention.repositories")
-    id("dev.alexcawl.metadata")
-    id("dev.alexcawl.multiloader.consumer")
+    id("dev.alexcawl.mcmultiloader.fabric")
 }
 
 dependencies {
@@ -30,18 +29,22 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-metadata {
-    resources("pack.mcmeta", "fabric.mod.json", "*.mixins.json") {
-        "version"(version)
-        "minecraft_version"(minecraftVersion)
-        "fabric_loader_version"(libs.versions.ext.fabric.loader.get())
-        "mod_name"(modName)
-        "mod_author"(modAuthor)
-        "mod_id"(modId)
-        "license"(modLicense)
-        "description"(description)
-        "java_version"(javaVersion)
+mcMultiLoader {
+    resourceTemplates {
+        loaderManifest("fabric.mod.json") {
+            "version"(version)
+            "minecraft_version"(minecraftVersion)
+            "fabric_loader_version"(libs.versions.ext.fabric.loader)
+            "mod_name"(modName)
+            "mod_author"(modAuthor)
+            "mod_id"(modId)
+            "license"(modLicense)
+            "description"(description)
+            "java_version"(javaVersion)
+        }
+        mixinConfig("$modId.fabric.mixins.json") {}
     }
+
     jarManifest {
         "Specification-Title"(modName)
         "Specification-Vendor"(modAuthor)
@@ -54,9 +57,6 @@ metadata {
 }
 
 loom {
-    mixin {
-        defaultRefmapName.set("$modId.refmap.json")
-    }
     runs {
         named("client") {
             client()
@@ -70,5 +70,18 @@ loom {
             ideConfigGenerated(true)
             runDir("runs/server")
         }
+        create("datagen") {
+            client()
+            configName = "Fabric Datagen"
+            ideConfigGenerated(true)
+            runDir("runs/datagen")
+            vmArg("-Dfabric-api.datagen")
+            vmArg("-Dfabric-api.datagen.output-dir=${file("src/generated/resources").absolutePath}")
+            vmArg("-Dfabric-api.datagen.modid=$modId")
+        }
     }
+}
+
+sourceSets.main {
+    resources.srcDir("src/generated/resources")
 }
