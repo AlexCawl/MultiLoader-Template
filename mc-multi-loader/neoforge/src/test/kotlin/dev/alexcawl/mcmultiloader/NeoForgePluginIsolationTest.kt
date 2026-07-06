@@ -22,7 +22,10 @@ class NeoForgePluginIsolationTest {
         write(
             "build.gradle.kts",
             """
-            plugins { id("dev.alexcawl.mcmultiloader.neoforge") }
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.neoforge")
+            }
             repositories { maven { url = uri("repo") } }
             dependencies { merged("com.example:common:1.0") }
             """.trimIndent()

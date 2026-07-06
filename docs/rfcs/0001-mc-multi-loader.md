@@ -6,11 +6,14 @@ Accepted for implementation. The MVP targets Minecraft 1.21.1, Java 21, Fabric, 
 
 ## Architecture
 
-Root `mc-multi-loader` is an independent three-module included build:
+Root `mc-multi-loader` is an independent four-module included build:
 
 - `common`: `dev.alexcawl.mcmultiloader.common`, no loader API dependency
+- `metadata`: `dev.alexcawl.mcmultiloader.metadata`, resource and JAR metadata processing with no loader API dependency
 - `fabric`: `dev.alexcawl.mcmultiloader.fabric`, depends only on common and Loom
 - `neoforge`: `dev.alexcawl.mcmultiloader.neoforge`, depends only on common and ModDevGradle
+
+Each plugin is applied explicitly and none of them applies Java, loader, convention, or another mc-multi-loader plugin.
 
 Common is compiled once into a normal JAR. A loader declares exactly one `merged` project or Maven dependency. That dependency extends `implementation`, remains available to development and datagen classpaths, and its direct JAR is unpacked into the loader resource output before Fabric remapping or NeoForge packaging. Using the source-set output makes the same common classes/resources visible in dev runs and in the final JAR. Transitive dependencies are not embedded.
 
@@ -19,7 +22,7 @@ Common is compiled once into a normal JAR. A loader declares exactly one `merged
 Each resource template owns its expansion values:
 
 ```kotlin
-mcMultiLoader {
+mcMultiLoaderMetadata {
     resourceTemplates {
         loaderManifest("fabric.mod.json") {
             "version"(project.version)

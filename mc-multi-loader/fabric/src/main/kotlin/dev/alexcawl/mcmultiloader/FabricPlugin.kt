@@ -1,6 +1,7 @@
 package dev.alexcawl.mcmultiloader
 
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -13,7 +14,7 @@ class FabricPlugin : Plugin<Project> {
             "mc-multi-loader-fabric-aw"
         )
 
-        target.pluginManager.withPlugin("fabric-loom") {
+        target.plugins.withType(LoomGradlePluginBootstrap::class.java).configureEach {
             val loom = target.extensions.getByType(LoomGradleExtensionAPI::class.java)
             loom.mixin.useLegacyMixinAp.set(false)
             val accessWidenerFile = target.providers.provider {

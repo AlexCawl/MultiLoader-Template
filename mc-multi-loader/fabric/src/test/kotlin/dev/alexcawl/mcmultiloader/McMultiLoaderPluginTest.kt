@@ -19,7 +19,7 @@ class McMultiLoaderPluginTest {
     lateinit var projectDir: Path
 
     @Test
-    fun `expands each template and merges one project dependency`() {
+    fun `merges one project dependency`() {
         writeProjectFixture()
 
         runner(":app:jar", ":app:copyAccessWidener").build()
@@ -45,6 +45,7 @@ class McMultiLoaderPluginTest {
             "build.gradle.kts",
             """
             plugins {
+                `java-library`
                 id("dev.alexcawl.mcmultiloader.fabric")
             }
             repositories { maven { url = uri("repo") } }
@@ -71,6 +72,7 @@ class McMultiLoaderPluginTest {
             "build.gradle.kts",
             """
             plugins {
+                `java-library`
                 id("dev.alexcawl.mcmultiloader.common")
                 `maven-publish`
             }
@@ -96,7 +98,10 @@ class McMultiLoaderPluginTest {
             consumer,
             "build.gradle.kts",
             """
-            plugins { id("dev.alexcawl.mcmultiloader.fabric") }
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.fabric")
+            }
             repositories { maven { url = uri("${repository.toUri()}") } }
             dependencies { merged("com.example:published-common:1.0") }
             tasks.register<Copy>("copyAccessWidener") {
@@ -120,7 +125,10 @@ class McMultiLoaderPluginTest {
     @Test
     fun `rejects missing merged dependency`() {
         write("settings.gradle.kts", "rootProject.name = \"missing-fixture\"")
-        write("build.gradle.kts", "plugins { id(\"dev.alexcawl.mcmultiloader.fabric\") }")
+        write(
+            "build.gradle.kts",
+            "plugins { `java-library`; id(\"dev.alexcawl.mcmultiloader.fabric\") }"
+        )
 
         val result = runner("jar").buildAndFail()
 
@@ -133,7 +141,10 @@ class McMultiLoaderPluginTest {
         write(
             "build.gradle.kts",
             """
-            plugins { id("dev.alexcawl.mcmultiloader.fabric") }
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.fabric")
+            }
             repositories { maven { url = uri("repo") } }
             dependencies {
                 merged("com.example:common:1.0")
@@ -170,13 +181,11 @@ class McMultiLoaderPluginTest {
         write(
             "common/build.gradle.kts",
             """
-            plugins { id("dev.alexcawl.mcmultiloader.common") }
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.common")
+            }
             mcMultiLoader {
-                resourceTemplates {
-                    template("common.txt") {
-                        "value"(providers.provider { "common-value" })
-                    }
-                }
                 fabricAccessWidener.set("accesswidener")
             }
             """.trimIndent()
@@ -184,22 +193,20 @@ class McMultiLoaderPluginTest {
         write(
             "app/build.gradle.kts",
             """
-            plugins { id("dev.alexcawl.mcmultiloader.fabric") }
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.fabric")
+            }
             dependencies { merged(project(":common")) }
             tasks.register<Copy>("copyAccessWidener") {
                 from(configurations["mergedFabricAccessWidener"])
                 into(layout.buildDirectory.dir("accessWidener"))
             }
-            mcMultiLoader {
-                resourceTemplates {
-                    template("app.txt") { "value"("app-value") }
-                }
-            }
             """.trimIndent()
         )
-        write("common/src/main/resources/common.txt", "${'$'}{value}")
+        write("common/src/main/resources/common.txt", "common-value")
         write("common/src/main/resources/accesswidener", "accessWidener v2 named\n")
-        write("app/src/main/resources/app.txt", "${'$'}{value}")
+        write("app/src/main/resources/app.txt", "app-value")
         write("common/src/main/java/com/example/Common.java", "package com.example; public final class Common {}")
     }
 

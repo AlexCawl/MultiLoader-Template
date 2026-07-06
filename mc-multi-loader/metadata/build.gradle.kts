@@ -7,8 +7,6 @@ dependencies {
     // Workaround for version catalogs in Kotlin Gradle plugin sources.
     // https://github.com/gradle/gradle/issues/15383
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
-    implementation(project(":common"))
-    compileOnly(libs.fabric.loom.gradle.plugin)
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
@@ -18,17 +16,13 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        register("fabric") {
-            id = "dev.alexcawl.mcmultiloader.fabric"
-            implementationClass = "dev.alexcawl.mcmultiloader.FabricPlugin"
+        register("metadata") {
+            id = "dev.alexcawl.mcmultiloader.metadata"
+            implementationClass = "dev.alexcawl.mcmultiloader.metadata.MetadataPlugin"
         }
     }
 }
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.pluginUnderTestMetadata {
-    pluginClasspath.from(configurations.compileClasspath)
 }

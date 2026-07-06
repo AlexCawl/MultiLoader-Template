@@ -10,7 +10,6 @@ import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.DocsType
 import org.gradle.api.attributes.Usage
 import org.gradle.api.component.AdhocComponentWithVariants
-import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.jvm.tasks.Jar
@@ -26,12 +25,12 @@ data class ConsumerModel(
 )
 
 internal fun Project.createBaseExtension(): McMultiLoaderExtension {
-    pluginManager.apply(JavaLibraryPlugin::class.java)
     tasks.withType(Jar::class.java).configureEach {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }
-    return extensions.create("mcMultiLoader", McMultiLoaderExtension::class.java, this)
+    return extensions.findByType(McMultiLoaderExtension::class.java)
+        ?: extensions.create("mcMultiLoader", McMultiLoaderExtension::class.java)
 }
 
 fun Project.createConsumerModel(): ConsumerModel {
@@ -52,22 +51,23 @@ fun Project.createConsumerModel(): ConsumerModel {
         }
     }
 
-    configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME) {
-        extendsFrom(merged)
-    }
-
     val commonTrees = providers.provider {
         requireSingleMergedDependency(merged)
         mergedArtifact.files.map(::zipTree)
     }
-    tasks.named("processResources", ProcessResources::class.java) {
-        dependsOn(mergedArtifact)
-        from(commonTrees) {
-            exclude("META-INF/MANIFEST.MF")
-            exclude("META-INF/*.SF")
-            exclude("META-INF/*.RSA")
-            exclude("META-INF/*.DSA")
-            exclude("META-INF/mc-multi-loader/**")
+    plugins.withType(JavaPlugin::class.java).configureEach {
+        configurations.named(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME) {
+            extendsFrom(merged)
+        }
+        tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, ProcessResources::class.java) {
+            dependsOn(mergedArtifact)
+            from(commonTrees) {
+                exclude("META-INF/MANIFEST.MF")
+                exclude("META-INF/*.SF")
+                exclude("META-INF/*.RSA")
+                exclude("META-INF/*.DSA")
+                exclude("META-INF/mc-multi-loader/**")
+            }
         }
     }
 

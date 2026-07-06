@@ -1,5 +1,6 @@
 package dev.alexcawl.mcmultiloader
 
+import net.neoforged.moddevgradle.boot.ModDevPlugin
 import net.neoforged.moddevgradle.dsl.NeoForgeExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,7 +14,7 @@ class NeoForgePlugin : Plugin<Project> {
             "mc-multi-loader-neoforge-at"
         )
 
-        target.pluginManager.withPlugin("net.neoforged.moddev") {
+        target.plugins.withType(ModDevPlugin::class.java).configureEach {
             target.extensions.getByType(NeoForgeExtension::class.java)
                 .accessTransformers.from(accessTransformer)
         }

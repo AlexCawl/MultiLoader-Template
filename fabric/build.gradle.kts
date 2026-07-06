@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.fabric")
+    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -29,7 +30,7 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoader {
+mcMultiLoaderMetadata {
     resourceTemplates {
         loaderManifest("fabric.mod.json") {
             "version"(version)

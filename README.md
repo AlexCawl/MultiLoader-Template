@@ -8,7 +8,7 @@ Gradle template for Minecraft 1.21.1 mods targeting Fabric and NeoForge from one
 common/                 loader-independent code and resources
 fabric/                 Fabric entry points and integrations
 neoforge/               NeoForge entry points and integrations
-mc-multi-loader/        Gradle plugins used by the three modules
+mc-multi-loader/        Gradle plugins used by the project modules
 gradle/convention/      shared repository conventions
 gradle/libs.versions.toml
 gradle.properties       mod metadata
@@ -17,8 +17,11 @@ gradle.properties       mod metadata
 The included plugin build is split by loader. A project only loads the implementation it applies:
 
 - `dev.alexcawl.mcmultiloader.common`
+- `dev.alexcawl.mcmultiloader.metadata`
 - `dev.alexcawl.mcmultiloader.fabric`
 - `dev.alexcawl.mcmultiloader.neoforge`
+
+The plugins are independent and never apply Java, loader, or other convention plugins. Apply the required language and loader plugins explicitly before configuring their extensions.
 
 ## Getting started
 
@@ -52,7 +55,7 @@ Common classes and resources are processed together with loader output. Fabric L
 Resource expansion is configured per file:
 
 ```kotlin
-mcMultiLoader {
+mcMultiLoaderMetadata {
     resourceTemplates {
         loaderManifest("fabric.mod.json") {
             "version"(project.version)

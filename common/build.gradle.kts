@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.common")
+    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -27,6 +28,11 @@ base {
 }
 
 mcMultiLoader {
+    fabricAccessWidener.set("accesswidener")
+    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
+}
+
+mcMultiLoaderMetadata {
     resourceTemplates {
         template("pack.mcmeta") {
             "mod_name"(modName)
@@ -35,9 +41,6 @@ mcMultiLoader {
             "mod_id"(modId)
         }
     }
-
-    fabricAccessWidener.set("accesswidener")
-    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
 
     jarManifest {
         "Specification-Title"(modName)

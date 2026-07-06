@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.neoforge")
+    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -27,7 +28,7 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoader {
+mcMultiLoaderMetadata {
     resourceTemplates {
         loaderManifest("META-INF/neoforge.mods.toml") {
             "version"(version)
