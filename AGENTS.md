@@ -25,7 +25,7 @@ Plugin IDs are:
 
 The implementations must remain isolated. No mc-multi-loader plugin applies Java, loader, convention, or other feature plugins; consuming projects apply all required plugins explicitly. `mc-multi-loader:common` and `mc-multi-loader:metadata` have no loader API dependency. Fabric and NeoForge plugin modules depend on common plus only their own loader Gradle API as `compileOnly`. Do not introduce cross-loader runtime dependencies.
 
-Use typed `plugins.withType(...)` integration hooks instead of string-based `pluginManager.withPlugin(...)` callbacks. Keep loader Gradle API coordinates and test-library versions in the root version catalog. The included build imports `gradle/libs.versions.toml`; preserve the generated-accessor classpath workaround until Gradle issue 15383 is resolved.
+Use typed `plugins.withType(...)` integration hooks instead of string-based `pluginManager.withPlugin(...)` callbacks. Keep loader Gradle API coordinates and test-library versions in the root version catalog. The included build imports `gradle/libs.versions.toml` for its build scripts only; do not add generated catalog accessors to plugin implementation dependencies.
 
 Each loader module declares exactly one direct `merged` project or Maven module dependency. `merged` extends `implementation`; transitive dependencies stay on classpaths, while only the direct common artifact is embedded. Do not add file dependencies or multiple direct dependencies.
 

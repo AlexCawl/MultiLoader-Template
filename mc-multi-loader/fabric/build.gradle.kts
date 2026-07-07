@@ -1,12 +1,8 @@
 plugins {
     `kotlin-dsl`
-    `java-gradle-plugin`
 }
 
 dependencies {
-    // Workaround for version catalogs in Kotlin Gradle plugin sources.
-    // https://github.com/gradle/gradle/issues/15383
-    implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
     implementation(project(":common"))
     compileOnly(libs.fabric.loom.gradle.plugin)
 
