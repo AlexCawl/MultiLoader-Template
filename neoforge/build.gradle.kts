@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.neoforge")
-    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -28,31 +27,33 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoaderMetadata {
-    resourceTemplates {
-        loaderManifest("META-INF/neoforge.mods.toml") {
-            "version"(version)
-            "minecraft_version_range"(minecraftVersionRange)
-            "neoforge_version"(neoforgeVersion)
-            "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range)
-            "mod_name"(modName)
-            "mod_author"(modAuthor)
-            "mod_id"(modId)
-            "license"(modLicense)
-            "description"(description)
-            "credits"(credits)
+mcMultiLoader {
+    metadata {
+        template {
+            template("META-INF/neoforge.mods.toml") {
+                "version"(version)
+                "minecraft_version_range"(minecraftVersionRange)
+                "neoforge_version"(neoforgeVersion)
+                "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range)
+                "mod_name"(modName)
+                "mod_author"(modAuthor)
+                "mod_id"(modId)
+                "license"(modLicense)
+                "description"(description)
+                "credits"(credits)
+            }
+            template("$modId.neoforge.mixins.json") {}
         }
-        mixinConfig("$modId.neoforge.mixins.json") {}
-    }
 
-    jarManifest {
-        "Specification-Title"(modName)
-        "Specification-Vendor"(modAuthor)
-        "Specification-Version"(version)
-        "Implementation-Title"(project.name)
-        "Implementation-Version"(version)
-        "Implementation-Vendor"(modAuthor)
-        "Built-On-Minecraft"(minecraftVersion)
+        jarManifest {
+            "Specification-Title"(modName)
+            "Specification-Vendor"(modAuthor)
+            "Specification-Version"(version)
+            "Implementation-Title"(project.name)
+            "Implementation-Version"(version)
+            "Implementation-Vendor"(modAuthor)
+            "Built-On-Minecraft"(minecraftVersion)
+        }
     }
 }
 

@@ -13,24 +13,24 @@ class CommonPlugin : Plugin<Project> {
             GenerateCommonDescriptorTask::class.java
         ) {
             group = "mc-multi-loader"
-            fabricAccessWidener.set(extension.fabricAccessWidener)
-            neoForgeAccessTransformer.set(extension.neoForgeAccessTransformer)
+            fabricAccessWidener.set(extension.accessExtension.fabricAccessWidenerPath)
+            neoForgeAccessTransformer.set(extension.accessExtension.neoForgeAccessTransformerPath)
             outputDirectory.set(target.layout.buildDirectory.dir("generated/mc-multi-loader/descriptor"))
         }
         target.plugins.withType(JavaPlugin::class.java).configureEach {
             target.afterEvaluate {
-                if (extension.fabricAccessWidener.isPresent) {
+                if (extension.accessExtension.fabricAccessWidenerPath.isPresent) {
                     target.createAccessFileElements(
                         "mcMultiLoaderFabricAccessWidenerElements",
                         "mc-multi-loader-fabric-aw",
-                        extension.fabricAccessWidener
+                        extension.accessExtension.fabricAccessWidenerPath
                     )
                 }
-                if (extension.neoForgeAccessTransformer.isPresent) {
+                if (extension.accessExtension.neoForgeAccessTransformerPath.isPresent) {
                     target.createAccessFileElements(
                         "mcMultiLoaderNeoForgeAccessTransformerElements",
                         "mc-multi-loader-neoforge-at",
-                        extension.neoForgeAccessTransformer
+                        extension.accessExtension.neoForgeAccessTransformerPath
                     )
                 }
             }

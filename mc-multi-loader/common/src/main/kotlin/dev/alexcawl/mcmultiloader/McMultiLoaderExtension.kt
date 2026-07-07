@@ -1,8 +1,12 @@
 package dev.alexcawl.mcmultiloader
 
-import org.gradle.api.provider.Property
+import dev.alexcawl.mcmultiloader.access.AccessExtension
+import dev.alexcawl.mcmultiloader.metadata.MetadataExtension
+import org.gradle.api.Action
 
 interface McMultiLoaderExtension {
-    val fabricAccessWidener: Property<String>
-    val neoForgeAccessTransformer: Property<String>
+    fun metadata(action: Action<in MetadataExtension>)
+
+    fun access(action: Action<in AccessExtension>)
 }
+

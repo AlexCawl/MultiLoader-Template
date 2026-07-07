@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.fabric.loom)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.fabric")
-    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -30,30 +29,32 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoaderMetadata {
-    resourceTemplates {
-        loaderManifest("fabric.mod.json") {
-            "version"(version)
-            "minecraft_version"(minecraftVersion)
-            "fabric_loader_version"(libs.versions.ext.fabric.loader)
-            "mod_name"(modName)
-            "mod_author"(modAuthor)
-            "mod_id"(modId)
-            "license"(modLicense)
-            "description"(description)
-            "java_version"(javaVersion)
+mcMultiLoader {
+    metadata {
+        template {
+            template("fabric.mod.json") {
+                "version"(version)
+                "minecraft_version"(minecraftVersion)
+                "fabric_loader_version"(libs.versions.ext.fabric.loader)
+                "mod_name"(modName)
+                "mod_author"(modAuthor)
+                "mod_id"(modId)
+                "license"(modLicense)
+                "description"(description)
+                "java_version"(javaVersion)
+            }
+            template("$modId.fabric.mixins.json") {}
         }
-        mixinConfig("$modId.fabric.mixins.json") {}
-    }
 
-    jarManifest {
-        "Specification-Title"(modName)
-        "Specification-Vendor"(modAuthor)
-        "Specification-Version"(version)
-        "Implementation-Title"(project.name)
-        "Implementation-Version"(version)
-        "Implementation-Vendor"(modAuthor)
-        "Built-On-Minecraft"(minecraftVersion)
+        jarManifest {
+            "Specification-Title"(modName)
+            "Specification-Vendor"(modAuthor)
+            "Specification-Version"(version)
+            "Implementation-Title"(project.name)
+            "Implementation-Version"(version)
+            "Implementation-Vendor"(modAuthor)
+            "Built-On-Minecraft"(minecraftVersion)
+        }
     }
 }
 

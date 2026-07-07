@@ -78,7 +78,9 @@ class McMultiLoaderPluginTest {
             }
             group = "com.example"
             version = "1.0"
-            mcMultiLoader { fabricAccessWidener.set("accesswidener") }
+            mcMultiLoader {
+                access { fabricAccessWidener("accesswidener") }
+            }
             publishing {
                 publications {
                     create<MavenPublication>("maven") { from(components["java"]) }
@@ -186,7 +188,7 @@ class McMultiLoaderPluginTest {
                 id("dev.alexcawl.mcmultiloader.common")
             }
             mcMultiLoader {
-                fabricAccessWidener.set("accesswidener")
+                access { fabricAccessWidener("accesswidener") }
             }
             """.trimIndent()
         )

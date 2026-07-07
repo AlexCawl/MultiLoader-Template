@@ -6,10 +6,9 @@ Accepted for implementation. The MVP targets Minecraft 1.21.1, Java 21, Fabric, 
 
 ## Architecture
 
-Root `mc-multi-loader` is an independent four-module included build:
+Root `mc-multi-loader` is an independent three-module included build:
 
-- `common`: `dev.alexcawl.mcmultiloader.common`, no loader API dependency
-- `metadata`: `dev.alexcawl.mcmultiloader.metadata`, resource and JAR metadata processing with no loader API dependency
+- `common`: `dev.alexcawl.mcmultiloader.common`, shared DSL and metadata processing with no loader API dependency
 - `fabric`: `dev.alexcawl.mcmultiloader.fabric`, depends only on common and Loom
 - `neoforge`: `dev.alexcawl.mcmultiloader.neoforge`, depends only on common and ModDevGradle
 
@@ -22,19 +21,21 @@ Common is compiled once into a normal JAR. A loader declares exactly one `merged
 Each resource template owns its expansion values:
 
 ```kotlin
-mcMultiLoaderMetadata {
-    resourceTemplates {
-        loaderManifest("fabric.mod.json") {
-            "version"(project.version)
-            "mod_id"(providers.gradleProperty("mod_id"))
+mcMultiLoader {
+    metadata {
+        template {
+            template("fabric.mod.json") {
+                "version"(project.version)
+                "mod_id"(providers.gradleProperty("mod_id"))
+            }
+            template("examplemod.fabric.mixins.json") {}
+            template("pack.mcmeta") {
+                "mod_name"(providers.gradleProperty("mod_name"))
+            }
         }
-        mixinConfig("examplemod.fabric.mixins.json") {}
-        template("pack.mcmeta") {
-            "mod_name"(providers.gradleProperty("mod_name"))
+        jarManifest {
+            "Implementation-Version"(project.version)
         }
-    }
-    jarManifest {
-        "Implementation-Version"(project.version)
     }
 }
 ```
@@ -44,6 +45,8 @@ Templates use Gradle `ProcessResources.filesMatching(...).expand(...)`. The plug
 ## Common descriptor and access files
 
 The common plugin adds `META-INF/mc-multi-loader/common.properties` with schema version and optional Fabric AW / NeoForge AT resource paths. It also publishes access files as dedicated Gradle variants so Loom and ModDevGradle can consume them during configuration for both project and published module dependencies. The original resource is included in the merged JAR.
+
+Access files are declared through `mcMultiLoader.access`, separately from metadata processing.
 
 The MVP supports one common Fabric AW and one common NeoForge AT. It does not convert formats, aggregate loader-local files, or validate syntax.
 

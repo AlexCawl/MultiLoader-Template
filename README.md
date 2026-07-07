@@ -17,7 +17,6 @@ gradle.properties       mod metadata
 The included plugin build is split by loader. A project only loads the implementation it applies:
 
 - `dev.alexcawl.mcmultiloader.common`
-- `dev.alexcawl.mcmultiloader.metadata`
 - `dev.alexcawl.mcmultiloader.fabric`
 - `dev.alexcawl.mcmultiloader.neoforge`
 
@@ -55,19 +54,21 @@ Common classes and resources are processed together with loader output. Fabric L
 Resource expansion is configured per file:
 
 ```kotlin
-mcMultiLoaderMetadata {
-    resourceTemplates {
-        loaderManifest("fabric.mod.json") {
-            "version"(project.version)
-            "mod_id"(providers.gradleProperty("mod_id"))
+mcMultiLoader {
+    metadata {
+        template {
+            template("fabric.mod.json") {
+                "version"(project.version)
+                "mod_id"(providers.gradleProperty("mod_id"))
+            }
+            template("examplemod.fabric.mixins.json") {}
+            template("pack.mcmeta") {
+                "mod_name"(providers.gradleProperty("mod_name"))
+            }
         }
-        mixinConfig("examplemod.fabric.mixins.json") {}
-        template("pack.mcmeta") {
-            "mod_name"(providers.gradleProperty("mod_name"))
+        jarManifest {
+            "Implementation-Version"(project.version)
         }
-    }
-    jarManifest {
-        "Implementation-Version"(project.version)
     }
 }
 ```
@@ -78,8 +79,10 @@ The common module may declare one Fabric access widener and one NeoForge access 
 
 ```kotlin
 mcMultiLoader {
-    fabricAccessWidener.set("accesswidener")
-    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
+    access {
+        fabricAccessWidener("accesswidener")
+        neoForgeAccessTransformer("META-INF/accesstransformer.cfg")
+    }
 }
 ```
 

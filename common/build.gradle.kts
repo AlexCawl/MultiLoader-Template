@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.neoforge.moddev)
     id("dev.alexcawl.convention.repositories")
     id("dev.alexcawl.mcmultiloader.common")
-    id("dev.alexcawl.mcmultiloader.metadata")
 }
 
 dependencies {
@@ -28,28 +27,30 @@ base {
 }
 
 mcMultiLoader {
-    fabricAccessWidener.set("accesswidener")
-    neoForgeAccessTransformer.set("META-INF/accesstransformer.cfg")
-}
-
-mcMultiLoaderMetadata {
-    resourceTemplates {
-        template("pack.mcmeta") {
-            "mod_name"(modName)
-        }
-        mixinConfig("$modId.mixins.json") {
-            "mod_id"(modId)
-        }
+    access {
+        fabricAccessWidener("accesswidener")
+        neoForgeAccessTransformer("META-INF/accesstransformer.cfg")
     }
 
-    jarManifest {
-        "Specification-Title"(modName)
-        "Specification-Vendor"(modAuthor)
-        "Specification-Version"(version)
-        "Implementation-Title"(project.name)
-        "Implementation-Version"(version)
-        "Implementation-Vendor"(modAuthor)
-        "Built-On-Minecraft"(minecraftVersion)
+    metadata {
+        template {
+            template("pack.mcmeta") {
+                "mod_name"(modName)
+            }
+            template("$modId.mixins.json") {
+                "mod_id"(modId)
+            }
+        }
+
+        jarManifest {
+            "Specification-Title"(modName)
+            "Specification-Vendor"(modAuthor)
+            "Specification-Version"(version)
+            "Implementation-Title"(project.name)
+            "Implementation-Version"(version)
+            "Implementation-Vendor"(modAuthor)
+            "Built-On-Minecraft"(minecraftVersion)
+        }
     }
 }
 

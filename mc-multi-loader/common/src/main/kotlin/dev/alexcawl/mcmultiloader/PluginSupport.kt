@@ -27,13 +27,15 @@ data class ConsumerModel(
     val mergedArtifact: NamedDomainObjectProvider<ResolvableConfiguration>
 )
 
-internal fun Project.createBaseExtension(): McMultiLoaderExtension {
+internal fun Project.createBaseExtension(): DefaultMcMultiLoaderExtension {
     tasks.withType(Jar::class.java).configureEach {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }
-    return extensions.findByType(McMultiLoaderExtension::class.java)
-        ?: extensions.create("mcMultiLoader", McMultiLoaderExtension::class.java)
+    return (extensions.findByType(McMultiLoaderExtension::class.java) as? DefaultMcMultiLoaderExtension)
+        ?: objects.newInstance(DefaultMcMultiLoaderExtension::class.java, this).also {
+            extensions.add(McMultiLoaderExtension::class.java, "mcMultiLoader", it)
+        }
 }
 
 fun Project.createConsumerModel(): ConsumerModel {

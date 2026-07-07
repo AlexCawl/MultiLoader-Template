@@ -1,6 +1,5 @@
 rootProject.name = "mc-multi-loader"
 include("common")
-include("metadata")
 include("fabric")
 include("neoforge")
 
