@@ -28,8 +28,8 @@ base {
 
 mcMultiLoader {
     access {
-        fabricAccessWidener("accesswidener")
-        neoForgeAccessTransformer("META-INF/accesstransformer.cfg")
+        fabricAccessWidener("src/main/resources/accesswidener")
+        neoForgeAccessTransformer("src/main/resources/META-INF/accesstransformer.cfg")
     }
 
     metadata {
@@ -45,9 +45,9 @@ mcMultiLoader {
         jarManifest {
             "Specification-Title"(modName)
             "Specification-Vendor"(modAuthor)
-            "Specification-Version"(version)
+            "Specification-Version"(version.toString())
             "Implementation-Title"(project.name)
-            "Implementation-Version"(version)
+            "Implementation-Version"(version.toString())
             "Implementation-Vendor"(modAuthor)
             "Built-On-Minecraft"(minecraftVersion)
         }

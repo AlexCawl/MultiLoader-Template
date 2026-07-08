@@ -1,4 +1,4 @@
-package dev.alexcawl.mcmultiloader.access
+package dev.alexcawl.mcmultiloader.extension
 
 import org.gradle.api.provider.Provider
 

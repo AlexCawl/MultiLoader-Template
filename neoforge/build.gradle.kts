@@ -31,7 +31,7 @@ mcMultiLoader {
     metadata {
         template {
             template("META-INF/neoforge.mods.toml") {
-                "version"(version)
+                "version"(version.toString())
                 "minecraft_version_range"(minecraftVersionRange)
                 "neoforge_version"(neoforgeVersion)
                 "neoforge_loader_version_range"(libs.versions.ext.neoforge.loader.range)
@@ -48,9 +48,9 @@ mcMultiLoader {
         jarManifest {
             "Specification-Title"(modName)
             "Specification-Vendor"(modAuthor)
-            "Specification-Version"(version)
+            "Specification-Version"(version.toString())
             "Implementation-Title"(project.name)
-            "Implementation-Version"(version)
+            "Implementation-Version"(version.toString())
             "Implementation-Vendor"(modAuthor)
             "Built-On-Minecraft"(minecraftVersion)
         }

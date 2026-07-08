@@ -1,12 +1,11 @@
-package dev.alexcawl.mcmultiloader
+package dev.alexcawl.mcmultiloader.extension
 
-import dev.alexcawl.mcmultiloader.access.AccessExtension
-import dev.alexcawl.mcmultiloader.metadata.MetadataExtension
 import org.gradle.api.Action
 
+@McMultiLoaderDsl
 interface McMultiLoaderExtension {
+
     fun metadata(action: Action<in MetadataExtension>)
 
     fun access(action: Action<in AccessExtension>)
 }
-

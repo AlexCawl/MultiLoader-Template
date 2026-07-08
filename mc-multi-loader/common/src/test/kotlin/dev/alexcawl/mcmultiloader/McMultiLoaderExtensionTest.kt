@@ -1,5 +1,6 @@
 package dev.alexcawl.mcmultiloader
 
+import dev.alexcawl.mcmultiloader.feature.DESCRIPTOR_PATH
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -37,10 +38,12 @@ class McMultiLoaderExtensionTest {
                             "value"("provider")
                         }
                     }
-                    jarManifest { "Implementation-Version"(project.version) }
+                    jarManifest {
+                        "Implementation-Version"(providers.provider { project.version.toString() })
+                    }
                 }
                 access {
-                    fabricAccessWidener("accesswidener")
+                    fabricAccessWidener("src/main/resources/accesswidener")
                 }
             }
             """.trimIndent()
@@ -63,6 +66,31 @@ class McMultiLoaderExtensionTest {
             assertEquals("shared", jar.getInputStream(jar.getJarEntry("b/shared.txt")).bufferedReader().readText())
             assertEquals("provider", jar.getInputStream(jar.getJarEntry("dynamic")).bufferedReader().readText())
             assertEquals("1.2.3", jar.manifest.mainAttributes.getValue("Implementation-Version"))
+            assertContains(
+                jar.getInputStream(jar.getJarEntry(DESCRIPTOR_PATH)).bufferedReader().readText(),
+                "fabricAccessWidener=accesswidener"
+            )
+        }
+    }
+
+    @Test
+    fun `does not depend on Java plugin application order`() {
+        write("settings.gradle.kts", "rootProject.name = \"plugin-order-fixture\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins { id("dev.alexcawl.mcmultiloader.common") }
+            mcMultiLoader {
+                access { fabricAccessWidener("src/main/resources/accesswidener") }
+            }
+            apply(plugin = "java-library")
+            """.trimIndent()
+        )
+        write("src/main/resources/accesswidener", "accessWidener v2 named\n")
+
+        runner("jar").build()
+
+        JarFile(projectDir.resolve("build/libs/plugin-order-fixture.jar").toFile()).use { jar ->
             assertContains(
                 jar.getInputStream(jar.getJarEntry(DESCRIPTOR_PATH)).bufferedReader().readText(),
                 "fabricAccessWidener=accesswidener"

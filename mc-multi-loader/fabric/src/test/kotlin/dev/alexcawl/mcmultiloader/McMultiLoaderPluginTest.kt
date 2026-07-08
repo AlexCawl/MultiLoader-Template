@@ -1,5 +1,7 @@
 package dev.alexcawl.mcmultiloader
 
+import dev.alexcawl.mcmultiloader.feature.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.feature.FABRIC_ACCESS_WIDENER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -30,7 +32,10 @@ class McMultiLoaderPluginTest {
             assertNotNull(jar.getEntry("com/example/Common.class"))
         }
         ZipFile(projectDir.resolve("common/build/libs/common.jar").toFile()).use { jar ->
-            assertContains(jar.readText(DESCRIPTOR_PATH), "fabricAccessWidener=accesswidener")
+            assertContains(
+                jar.readText(DESCRIPTOR_PATH),
+                "$FABRIC_ACCESS_WIDENER_PROPERTY=accesswidener",
+            )
         }
         assertEquals(
             "accessWidener v2 named\n",
@@ -79,7 +84,7 @@ class McMultiLoaderPluginTest {
             group = "com.example"
             version = "1.0"
             mcMultiLoader {
-                access { fabricAccessWidener("accesswidener") }
+                access { fabricAccessWidener("src/main/resources/accesswidener") }
             }
             publishing {
                 publications {
@@ -188,7 +193,7 @@ class McMultiLoaderPluginTest {
                 id("dev.alexcawl.mcmultiloader.common")
             }
             mcMultiLoader {
-                access { fabricAccessWidener("accesswidener") }
+                access { fabricAccessWidener("src/main/resources/accesswidener") }
             }
             """.trimIndent()
         )

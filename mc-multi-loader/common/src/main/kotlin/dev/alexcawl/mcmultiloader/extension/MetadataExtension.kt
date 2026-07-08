@@ -1,4 +1,4 @@
-package dev.alexcawl.mcmultiloader.metadata
+package dev.alexcawl.mcmultiloader.extension
 
 import org.gradle.api.Action
 import org.gradle.api.provider.Provider
@@ -20,6 +20,9 @@ interface MetadataExtension {
 
     @MetadataDsl
     interface BuilderScope {
-        operator fun String.invoke(value: Any)
+
+        operator fun String.invoke(value: String)
+
+        operator fun String.invoke(value: Provider<String>)
     }
 }

@@ -33,7 +33,7 @@ mcMultiLoader {
     metadata {
         template {
             template("fabric.mod.json") {
-                "version"(version)
+                "version"(version.toString())
                 "minecraft_version"(minecraftVersion)
                 "fabric_loader_version"(libs.versions.ext.fabric.loader)
                 "mod_name"(modName)
@@ -49,9 +49,9 @@ mcMultiLoader {
         jarManifest {
             "Specification-Title"(modName)
             "Specification-Vendor"(modAuthor)
-            "Specification-Version"(version)
+            "Specification-Version"(version.toString())
             "Implementation-Title"(project.name)
-            "Implementation-Version"(version)
+            "Implementation-Version"(version.toString())
             "Implementation-Vendor"(modAuthor)
             "Built-On-Minecraft"(minecraftVersion)
         }
