@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common"))
+    implementation(project(":core"))
     compileOnly(libs.neoforge.moddev.gradle.plugin)
 
     testImplementation(gradleTestKit())
@@ -24,7 +24,7 @@ gradlePlugin {
     plugins {
         register("neoforge") {
             id = "dev.alexcawl.mcmultiloader.neoforge"
-            implementationClass = "dev.alexcawl.mcmultiloader.NeoForgePlugin"
+            implementationClass = "dev.alexcawl.mcmultiloader.neoforge.NeoForgePlugin"
         }
     }
 }

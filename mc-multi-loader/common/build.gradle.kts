@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":core"))
+
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
@@ -13,7 +15,7 @@ gradlePlugin {
     plugins {
         register("common") {
             id = "dev.alexcawl.mcmultiloader.common"
-            implementationClass = "dev.alexcawl.mcmultiloader.CommonPlugin"
+            implementationClass = "dev.alexcawl.mcmultiloader.common.CommonPlugin"
         }
     }
 }

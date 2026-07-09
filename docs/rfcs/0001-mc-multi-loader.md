@@ -6,11 +6,12 @@ Accepted for implementation. The MVP targets Minecraft 1.21.1, Java 21, Fabric, 
 
 ## Architecture
 
-Root `mc-multi-loader` is an independent three-module included build:
+Root `mc-multi-loader` is an independent four-module included build:
 
-- `common`: `dev.alexcawl.mcmultiloader.common`, shared DSL and metadata processing with no loader API dependency
-- `fabric`: `dev.alexcawl.mcmultiloader.fabric`, depends only on common and Loom
-- `neoforge`: `dev.alexcawl.mcmultiloader.neoforge`, depends only on common and ModDevGradle
+- `core`: shared DSL, metadata processing, descriptor handling, and merge utilities with no plugin ID
+- `common`: `dev.alexcawl.mcmultiloader.common`, common-plugin entrypoint depending on core
+- `fabric`: `dev.alexcawl.mcmultiloader.fabric`, depends only on core and Loom
+- `neoforge`: `dev.alexcawl.mcmultiloader.neoforge`, depends only on core and ModDevGradle
 
 Each plugin is applied explicitly and none of them applies Java, loader, convention, or another mc-multi-loader plugin.
 

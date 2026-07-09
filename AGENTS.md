@@ -7,7 +7,7 @@ This is a Java 21 Gradle multi-project template for Minecraft 1.21.1 using Mojan
 - `common/`: loader-independent Java code, shared resources, common mixins, Fabric AW, and NeoForge AT.
 - `fabric/`: Fabric entry points, integrations, services, metadata, and native datagen configuration.
 - `neoforge/`: NeoForge entry points, integrations, services, metadata, and native datagen configuration.
-- `mc-multi-loader/`: independent included Gradle build containing separate `common`, `fabric`, and `neoforge` plugin modules.
+- `mc-multi-loader/`: independent included Gradle build containing `core`, `common`, `fabric`, and `neoforge` plugin modules.
 - `gradle/convention/`: shared repository conventions.
 - `gradle/libs.versions.toml`: dependency, Minecraft, loader, and plugin versions.
 - `gradle.properties`: mod identity and metadata.
@@ -22,7 +22,7 @@ Plugin IDs are:
 - `dev.alexcawl.mcmultiloader.fabric`
 - `dev.alexcawl.mcmultiloader.neoforge`
 
-The implementations must remain isolated. No mc-multi-loader plugin applies Java, loader, convention, or other feature plugins; consuming projects apply all required plugins explicitly. `mc-multi-loader:common` has no loader API dependency. Fabric and NeoForge plugin modules depend on common plus only their own loader Gradle API as `compileOnly`. Do not introduce cross-loader runtime dependencies.
+The implementations must remain isolated. No mc-multi-loader plugin applies Java, loader, convention, or other feature plugins; consuming projects apply all required plugins explicitly. `mc-multi-loader:core` and `mc-multi-loader:common` have no loader API dependency. Common, Fabric, and NeoForge plugin modules depend on core; Fabric and NeoForge additionally depend only on their own loader Gradle API as `compileOnly`. Do not introduce cross-loader runtime dependencies.
 
 Use typed `plugins.withType(...)` integration hooks instead of string-based `pluginManager.withPlugin(...)` callbacks. Keep loader Gradle API coordinates and test-library versions in the root version catalog. The included build imports `gradle/libs.versions.toml` for its build scripts only; do not add generated catalog accessors to plugin implementation dependencies.
 

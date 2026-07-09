@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common"))
+    implementation(project(":core"))
     compileOnly(libs.fabric.loom.gradle.plugin)
 
     testImplementation(gradleTestKit())
@@ -16,7 +16,7 @@ gradlePlugin {
     plugins {
         register("fabric") {
             id = "dev.alexcawl.mcmultiloader.fabric"
-            implementationClass = "dev.alexcawl.mcmultiloader.FabricPlugin"
+            implementationClass = "dev.alexcawl.mcmultiloader.fabric.FabricPlugin"
         }
     }
 }
