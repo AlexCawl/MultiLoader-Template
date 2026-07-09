@@ -37,7 +37,7 @@ Eclipse is not supported.
 
 Most code belongs in `common`. It may use Minecraft, Mixin, and loader-independent libraries, but it must not reference Fabric or NeoForge APIs. Loader-specific entry points, event handling, integrations, and service implementations belong in their respective modules.
 
-Each loader module declares one common artifact:
+Each loader module declares one or more common artifacts:
 
 ```kotlin
 dependencies {
@@ -45,7 +45,7 @@ dependencies {
 }
 ```
 
-`merged` also accepts a normal Maven module dependency. It behaves like `implementation` for compile and runtime classpaths, while only the direct common JAR is merged into the final loader JAR. File dependencies and multiple direct `merged` dependencies are not supported.
+`merged` also accepts normal Maven module dependencies. It behaves like `implementation` for compile and runtime classpaths. Direct `merged` artifacts are embedded; transitive artifacts are embedded only when they contain `META-INF/mc-multi-loader/common.properties`.
 
 Common classes and resources are processed together with loader output. Fabric Loom therefore remaps common and Fabric classes in one pass; NeoForge packages the same common output through ModDevGradle.
 
@@ -86,7 +86,19 @@ mcMultiLoader {
 }
 ```
 
-The common plugin publishes these files through dedicated Gradle variants. The Fabric and NeoForge plugins wire the matching variant into Loom or ModDevGradle. Manifests must still reference the resource paths explicitly.
+The descriptor in the common JAR is the source used by loader plugins to discover access files.
+
+Fabric loader modules own their final access widener and configure it through the Fabric extension:
+
+```kotlin
+mcFabricLoader {
+    access {
+        fabricAccessWidener("src/main/resources/META-INF/fabric.accesswidener")
+    }
+}
+```
+
+The Fabric plugin wires that file into Loom and validates that it contains the entries required by all embedded common access wideners. Fabric metadata must reference the same resource path explicitly. NeoForge extracts all descriptor-declared access transformers from embedded common artifacts and passes them to ModDevGradle.
 
 Fabric mixins use Loom static remapping. Refmaps, the legacy Mixin annotation processor, and `loom.mixin` are not used.
 

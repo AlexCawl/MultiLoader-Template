@@ -12,23 +12,25 @@ import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.language.jvm.tasks.ProcessResources
+import java.io.File
+import java.util.zip.ZipFile
 
 const val MERGED_CONFIGURATION_NAME = "merged"
 const val MERGED_ARTIFACT_CONFIGURATION_NAME = "mergedArtifact"
-const val MERGED_CONFIGURATION_DESCRIPTION = "The single common module merged into this loader artifact."
+const val DIRECT_MERGED_ARTIFACT_CONFIGURATION_NAME = "directMergedArtifact"
+const val MERGED_CONFIGURATION_DESCRIPTION = "Common modules merged into this loader artifact."
 const val MANIFEST_EXCLUDE = "META-INF/MANIFEST.MF"
 const val SIGNATURE_EXCLUDE = "META-INF/*.SF"
 const val RSA_SIGNATURE_EXCLUDE = "META-INF/*.RSA"
 const val DSA_SIGNATURE_EXCLUDE = "META-INF/*.DSA"
 const val MC_MULTI_LOADER_METADATA_EXCLUDE = "META-INF/mc-multi-loader/**"
-const val MERGED_DEPENDENCY_COUNT_ERROR =
-    "Configuration '%s' must contain exactly one dependency, but contains %d."
 const val MERGED_DEPENDENCY_TYPE_ERROR =
     "Configuration '%s' only supports project or external module dependencies."
 
 data class ConsumerModel(
     val merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
     val mergedArtifact: NamedDomainObjectProvider<ResolvableConfiguration>,
+    val directMergedArtifact: NamedDomainObjectProvider<ResolvableConfiguration>,
 )
 
 fun Project.configureMerged(): ConsumerModel {
@@ -36,6 +38,14 @@ fun Project.configureMerged(): ConsumerModel {
         description = MERGED_CONFIGURATION_DESCRIPTION
     }
     val mergedArtifact = configurations.resolvable(MERGED_ARTIFACT_CONFIGURATION_NAME) {
+        isTransitive = true
+        extendsFrom(merged.get())
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.LIBRARY))
+        }
+    }
+    val directMergedArtifact = configurations.resolvable(DIRECT_MERGED_ARTIFACT_CONFIGURATION_NAME) {
         isTransitive = false
         extendsFrom(merged.get())
         attributes {
@@ -44,8 +54,9 @@ fun Project.configureMerged(): ConsumerModel {
         }
     }
     val commonTrees = providers.provider {
-        requireSingleMergedDependency(merged.get())
-        mergedArtifact.get().files.map(::zipTree)
+        requireSupportedMergedDependencies(merged.get())
+        selectEmbeddedArtifacts(mergedArtifact.get().files, directMergedArtifact.get().files)
+            .map(::zipTree)
     }
 
     plugins.withType(JavaPlugin::class.java).configureEach {
@@ -53,7 +64,7 @@ fun Project.configureMerged(): ConsumerModel {
             extendsFrom(merged.get())
         }
         tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, ProcessResources::class.java) {
-            dependsOn(mergedArtifact)
+            dependsOn(mergedArtifact, directMergedArtifact)
             from(commonTrees) {
                 exclude(MANIFEST_EXCLUDE)
                 exclude(SIGNATURE_EXCLUDE)
@@ -64,16 +75,27 @@ fun Project.configureMerged(): ConsumerModel {
         }
     }
 
-    return ConsumerModel(merged, mergedArtifact)
+    return ConsumerModel(merged, mergedArtifact, directMergedArtifact)
 }
 
-private fun requireSingleMergedDependency(merged: Configuration) {
-    val dependencies = merged.dependencies.toList()
-    if (dependencies.size != 1) {
-        throw GradleException(MERGED_DEPENDENCY_COUNT_ERROR.format(merged.name, dependencies.size))
+internal fun selectEmbeddedArtifacts(
+    artifacts: Iterable<File>,
+    directArtifacts: Iterable<File>,
+): List<File> {
+    val directPaths = directArtifacts.map { it.normalizedPath() }.toSet()
+    return artifacts.filter { artifact ->
+        artifact.normalizedPath() in directPaths || artifact.hasCommonDescriptor()
     }
-    val dependency = dependencies.single()
-    if (dependency !is ProjectDependency && dependency !is ExternalModuleDependency) {
+}
+
+internal fun File.hasCommonDescriptor(): Boolean = isFile && runCatching {
+    ZipFile(this).use { zip -> zip.getEntry(DESCRIPTOR_PATH) != null }
+}.getOrDefault(false)
+
+private fun requireSupportedMergedDependencies(merged: Configuration) {
+    if (merged.dependencies.any { it !is ProjectDependency && it !is ExternalModuleDependency }) {
         throw GradleException(MERGED_DEPENDENCY_TYPE_ERROR.format(merged.name))
     }
 }
+
+private fun File.normalizedPath() = toPath().toAbsolutePath().normalize()

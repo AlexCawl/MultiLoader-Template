@@ -23,7 +23,7 @@
         "${mod_id}.mixins.json",
         "${mod_id}.fabric.mixins.json"
     ],
-    "accessWidener": "accesswidener",
+    "accessWidener": "META-INF/fabric.accesswidener",
     "depends": {
         "fabricloader": ">=${fabric_loader_version}",
         "fabric-api": "*",

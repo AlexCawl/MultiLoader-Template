@@ -58,6 +58,12 @@ mcMultiLoader {
     }
 }
 
+mcFabricLoader {
+    access {
+        fabricAccessWidener("src/main/resources/META-INF/fabric.accesswidener")
+    }
+}
+
 loom {
     runs {
         named("client") {
