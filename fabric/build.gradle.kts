@@ -31,8 +31,8 @@ base {
 
 mcMultiLoader {
     metadata {
-        template {
-            template("fabric.mod.json") {
+        resources {
+            resource("fabric.mod.json") {
                 "version"(version.toString())
                 "minecraft_version"(minecraftVersion)
                 "fabric_loader_version"(libs.versions.ext.fabric.loader)
@@ -43,7 +43,7 @@ mcMultiLoader {
                 "description"(description)
                 "java_version"(javaVersion)
             }
-            template("$modId.fabric.mixins.json") {}
+            resource("$modId.fabric.mixins.json") {}
         }
 
         jarManifest {

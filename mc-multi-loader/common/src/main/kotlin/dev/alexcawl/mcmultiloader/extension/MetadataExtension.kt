@@ -6,16 +6,14 @@ import org.gradle.api.provider.Provider
 @MetadataDsl
 interface MetadataExtension {
 
-    fun template(action: Action<in TemplateScope>)
+    fun resources(action: Action<in ResourceScope>)
 
     fun jarManifest(action: Action<in BuilderScope>)
 
     @MetadataDsl
-    interface TemplateScope {
+    interface ResourceScope {
 
-        fun template(vararg paths: String, action: Action<in BuilderScope>)
-
-        fun template(path: Provider<String>, action: Action<in BuilderScope>)
+        fun resource(vararg patterns: String, action: Action<in BuilderScope>)
     }
 
     @MetadataDsl

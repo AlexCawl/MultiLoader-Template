@@ -11,7 +11,11 @@ import org.gradle.api.Project
 open class CommonPlugin : Plugin<Project> {
     final override fun apply(target: Project) {
         val extension = target.registerMcMultiLoaderExtension()
-        target.configureMetadata(extension.metadataExtension)
+        with(extension) {
+            with(metadataExtension) {
+                configureMetadata(target, resourcesExpands, jarManifestAttributes)
+            }
+        }
         configureProject(target, extension)
     }
 

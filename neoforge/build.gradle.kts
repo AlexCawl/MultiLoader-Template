@@ -29,8 +29,8 @@ base {
 
 mcMultiLoader {
     metadata {
-        template {
-            template("META-INF/neoforge.mods.toml") {
+        resources {
+            resource("META-INF/neoforge.mods.toml") {
                 "version"(version.toString())
                 "minecraft_version_range"(minecraftVersionRange)
                 "neoforge_version"(neoforgeVersion)
@@ -42,7 +42,7 @@ mcMultiLoader {
                 "description"(description)
                 "credits"(credits)
             }
-            template("$modId.neoforge.mixins.json") {}
+            resource("$modId.neoforge.mixins.json") {}
         }
 
         jarManifest {

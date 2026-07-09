@@ -33,11 +33,11 @@ mcMultiLoader {
     }
 
     metadata {
-        template {
-            template("pack.mcmeta") {
+        resources {
+            resource("pack.mcmeta") {
                 "mod_name"(modName)
             }
-            template("$modId.mixins.json") {
+            resource("$modId.mixins.json") {
                 "mod_id"(modId)
             }
         }

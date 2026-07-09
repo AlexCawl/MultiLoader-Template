@@ -2,10 +2,9 @@ package dev.alexcawl.mcmultiloader.extension.impl
 
 import dev.alexcawl.mcmultiloader.extension.MetadataExtension
 import dev.alexcawl.mcmultiloader.extension.MetadataExtension.BuilderScope
-import dev.alexcawl.mcmultiloader.extension.MetadataExtension.TemplateScope
+import dev.alexcawl.mcmultiloader.extension.MetadataExtension.ResourceScope
 import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
-import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
@@ -18,13 +17,13 @@ abstract class MetadataExtensionImpl @Inject constructor(
     private val objects: ObjectFactory,
 ) : MetadataExtension {
 
-    internal val templates: DomainObjectSet<Template> = objects.domainObjectSet(Template::class)
+    internal val resourcesExpands: DomainObjectSet<ResourceExpand> = objects.domainObjectSet(ResourceExpand::class)
 
     internal val jarManifestAttributes: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
 
-    override fun template(action: Action<in TemplateScope>) {
-        val templateScope = objects.newInstance(TemplateScopeImpl::class, templates)
-        action.execute(templateScope)
+    override fun resources(action: Action<in ResourceScope>) {
+        val resourceScope = objects.newInstance(ResourceScopeImpl::class, resourcesExpands)
+        action.execute(resourceScope)
     }
 
     override fun jarManifest(action: Action<in BuilderScope>) {
@@ -33,26 +32,17 @@ abstract class MetadataExtensionImpl @Inject constructor(
     }
 }
 
-private abstract class TemplateScopeImpl @Inject constructor(
-    private val layout: ProjectLayout,
+private abstract class ResourceScopeImpl @Inject constructor(
     private val objects: ObjectFactory,
-    private val templates: DomainObjectSet<Template>,
-) : TemplateScope {
+    private val resourcesExpands: DomainObjectSet<ResourceExpand>,
+) : ResourceScope {
 
-    override fun template(vararg paths: String, action: Action<in BuilderScope>) {
-        val template = objects.newInstance(Template::class)
-        val builder = objects.newInstance(BuilderScopeImpl::class, template.attributes)
-        template.files.from(layout.projectDirectory.files(paths))
+    override fun resource(vararg patterns: String, action: Action<in BuilderScope>) {
+        val resourceExpand = objects.newInstance(ResourceExpand::class)
+        val builder = objects.newInstance(BuilderScopeImpl::class, resourceExpand.attributes)
+        resourceExpand.patterns.addAll(patterns.toList())
         action.execute(builder)
-        templates.add(template)
-    }
-
-    override fun template(path: Provider<String>, action: Action<in BuilderScope>) {
-        val template = objects.newInstance(Template::class)
-        val builder = objects.newInstance(BuilderScopeImpl::class, template.attributes)
-        template.files.from(layout.projectDirectory.file(path))
-        action.execute(builder)
-        templates.add(template)
+        resourcesExpands.add(resourceExpand)
     }
 }
 

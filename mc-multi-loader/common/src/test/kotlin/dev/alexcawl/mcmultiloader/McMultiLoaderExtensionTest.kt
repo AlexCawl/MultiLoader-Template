@@ -28,13 +28,13 @@ class McMultiLoaderExtensionTest {
             version = "1.2.3"
             mcMultiLoader {
                 metadata {
-                    template {
-                        template("first.txt") { "value"(providers.provider { "first" }) }
-                        template("second.txt") { "value"("second") }
-                        template("a/shared.txt", "b/shared.txt") {
+                    resources {
+                        resource("first.txt") { "value"(providers.provider { "first" }) }
+                        resource("second.txt") { "value"("second") }
+                        resource("a/shared.txt", "b/shared.txt") {
                             "value"("shared")
                         }
-                        template(providers.provider { "dynamic" }) {
+                        resource("dynamic") {
                             "value"("provider")
                         }
                     }

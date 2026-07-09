@@ -1,47 +1,49 @@
 package dev.alexcawl.mcmultiloader.feature
 
-import dev.alexcawl.mcmultiloader.extension.impl.MetadataExtensionImpl
+import dev.alexcawl.mcmultiloader.extension.impl.ResourceExpand
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.MapProperty
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
 
-const val TEMPLATE_INPUT_PROPERTY_PREFIX = "mcMultiLoader.metadata.template"
-const val TEMPLATE_PATHS_INPUT_PROPERTY = "paths"
-const val TEMPLATE_ATTRIBUTES_INPUT_PROPERTY = "attributes"
-const val JAR_MANIFEST_INPUT_PROPERTY = "mcMultiLoader.metadata.jarManifest"
+private const val RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY = "mcMultiLoader.metadata.resources.pattern"
+private const val RESOURCE_EXPANDS_ATTRIBUTES_INPUT_PROPERTY = "mcMultiLoader.metadata.resources.attributes"
+private const val JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY = "mcMultiLoader.metadata.jarManifest.attributes"
 
-internal fun Project.configureMetadata(extension: MetadataExtensionImpl) {
-    val projectDirectory = layout.projectDirectory.asFile
-    var templateIndex = 0
-    extension.templates.configureEach {
-        val inputPrefix = "$TEMPLATE_INPUT_PROPERTY_PREFIX.${templateIndex++}"
-        val paths = files.elements.map { elements ->
-            elements.map { element ->
-                element.asFile.relativeTo(projectDirectory).invariantSeparatorsPath
-            }
-        }
-        val values = attributes
-        plugins.withType(JavaPlugin::class.java).configureEach {
-            tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, ProcessResources::class.java) {
-                inputs.property("$inputPrefix.$TEMPLATE_PATHS_INPUT_PROPERTY", paths)
-                inputs.property("$inputPrefix.$TEMPLATE_ATTRIBUTES_INPUT_PROPERTY", values)
-                eachFile {
-                    if (path in paths.get()) {
-                        expand(values.get())
-                    }
+internal fun configureMetadata(
+    project: Project,
+    resourcesExpands: DomainObjectSet<ResourceExpand>,
+    jarManifestAttributes: MapProperty<String, String>,
+) {
+    project.plugins.withType<JavaPlugin> {
+        configureResources(project, resourcesExpands)
+        configureJarManifest(project, jarManifestAttributes)
+    }
+}
+
+private fun configureResources(project: Project, resourcesExpands: DomainObjectSet<ResourceExpand>) {
+    resourcesExpands.configureEach {
+        project.tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+            inputs.property(RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY, patterns)
+            inputs.property(RESOURCE_EXPANDS_ATTRIBUTES_INPUT_PROPERTY, attributes)
+            doFirst {
+                filesMatching(patterns.get()) {
+                    expand(attributes.get())
                 }
             }
         }
     }
+}
 
-    val manifestAttributes = extension.jarManifestAttributes
-    plugins.withType(JavaPlugin::class.java).configureEach {
-        tasks.named(JavaPlugin.JAR_TASK_NAME, Jar::class.java) {
-            inputs.property(JAR_MANIFEST_INPUT_PROPERTY, manifestAttributes)
-            doFirst {
-                manifest.attributes(manifestAttributes.get())
-            }
+private fun configureJarManifest(project: Project, attributes: MapProperty<String, String>) {
+    project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
+        inputs.property(JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY, attributes)
+        doFirst {
+            manifest.attributes(attributes.get())
         }
     }
 }
