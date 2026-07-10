@@ -24,15 +24,17 @@ Plugin IDs are:
 
 The implementations must remain isolated. No mc-multi-loader plugin applies Java, loader, convention, or other feature plugins; consuming projects apply all required plugins explicitly. `mc-multi-loader:core` and `mc-multi-loader:common` have no loader API dependency. Common, Fabric, and NeoForge plugin modules depend on core; Fabric and NeoForge additionally depend only on their own loader Gradle API as `compileOnly`. Do not introduce cross-loader runtime dependencies.
 
+Keep plugin-specific extension containers and registration in their owning `common`, `fabric`, or `neoforge` module. Only shared metadata DSL/model and processing belong in `core`; `core` must not own aggregate plugin extensions.
+
 Use typed `plugins.withType(...)` integration hooks instead of string-based `pluginManager.withPlugin(...)` callbacks. Keep loader Gradle API coordinates and test-library versions in the root version catalog. The included build imports `gradle/libs.versions.toml` for its build scripts only; do not add generated catalog accessors to plugin implementation dependencies.
 
-Each loader module declares exactly one direct `merged` project or Maven module dependency. `merged` extends `implementation`; transitive dependencies stay on classpaths, while only the direct common artifact is embedded. Do not add file dependencies or multiple direct dependencies.
+Each loader module may declare multiple direct `merged` project or Maven module dependencies. `merged` extends `implementation`; every direct artifact is embedded, and transitive artifacts are embedded only when they carry the common descriptor. Do not add file dependencies.
 
 Create custom configurations with role-locked lazy factories: `dependencyScope`, `resolvable`, or `consumable`. Preserve providers through plugin internals and avoid `configurations.create` plus mutable role flags.
 
-Configure resource expansion and JAR manifest attributes through `mcMultiLoader.metadata`. Configure common AW/AT paths through `mcMultiLoader.access`. The plugin intentionally does not validate JSON/TOML, placeholder completeness, mixin registration, or AW/AT manifest references. Keep loader manifests explicit.
+Configure resource expansion and JAR manifest attributes through the owning `mcCommonLoader.metadata`, `mcFabricLoader.metadata`, or `mcNeoForgeLoader.metadata` block. Configure common AW/AT paths through `mcCommonLoader.access`, final Fabric AW through `mcFabricLoader.access`, and loader-local NeoForge AT through `mcNeoForgeLoader.access`. The plugin intentionally does not validate JSON/TOML, placeholder completeness, mixin registration, or AW/AT manifest references. Keep loader manifests explicit.
 
-Common may publish one Fabric AW and one NeoForge AT through `fabricAccessWidener` and `neoForgeAccessTransformer`. Fabric uses Loom static mixin remapping without refmaps or the legacy Mixin AP. Datagen remains native to each loader module.
+Common may publish one Fabric AW and one NeoForge AT through `fabricAccessWidener` and `neoForgeAccessTransformer`. NeoForge loader modules may additionally declare one loader-local AT. Fabric uses Loom static mixin remapping without refmaps or the legacy Mixin AP. Datagen remains native to each loader module.
 
 ## Build, Test, and Development Commands
 

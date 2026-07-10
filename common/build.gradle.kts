@@ -26,7 +26,7 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoader {
+mcCommonLoader {
     access {
         fabricAccessWidener("src/main/resources/accesswidener")
         neoForgeAccessTransformer("src/main/resources/META-INF/accesstransformer.cfg")

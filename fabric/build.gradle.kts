@@ -29,7 +29,7 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoader {
+mcFabricLoader {
     metadata {
         resources {
             resource("fabric.mod.json") {
@@ -56,9 +56,7 @@ mcMultiLoader {
             "Built-On-Minecraft"(minecraftVersion)
         }
     }
-}
 
-mcFabricLoader {
     access {
         fabricAccessWidener("src/main/resources/META-INF/fabric.accesswidener")
     }

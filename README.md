@@ -54,15 +54,15 @@ Common classes and resources are processed together with loader output. Fabric L
 Resource expansion is configured per file:
 
 ```kotlin
-mcMultiLoader {
+mcFabricLoader {
     metadata {
-        template {
-            template("fabric.mod.json") {
+        resources {
+            resource("fabric.mod.json") {
                 "version"(project.version)
                 "mod_id"(providers.gradleProperty("mod_id"))
             }
-            template("examplemod.fabric.mixins.json") {}
-            template("pack.mcmeta") {
+            resource("examplemod.fabric.mixins.json") {}
+            resource("pack.mcmeta") {
                 "mod_name"(providers.gradleProperty("mod_name"))
             }
         }
@@ -78,7 +78,7 @@ The plugin expands declared files but does not generate or validate Fabric JSON,
 The common module may declare one Fabric access widener and one NeoForge access transformer:
 
 ```kotlin
-mcMultiLoader {
+mcCommonLoader {
     access {
         fabricAccessWidener("accesswidener")
         neoForgeAccessTransformer("META-INF/accesstransformer.cfg")
@@ -92,13 +92,28 @@ Fabric loader modules own their final access widener and configure it through th
 
 ```kotlin
 mcFabricLoader {
+    metadata {
+        // Fabric resource expansion and JAR manifest
+    }
     access {
         fabricAccessWidener("src/main/resources/META-INF/fabric.accesswidener")
     }
 }
 ```
 
-The Fabric plugin wires that file into Loom and validates that it contains the entries required by all embedded common access wideners. Fabric metadata must reference the same resource path explicitly. NeoForge extracts all descriptor-declared access transformers from embedded common artifacts and passes them to ModDevGradle.
+The Fabric plugin wires that file into Loom and validates that it contains the entries required by all embedded common access wideners. Fabric metadata must reference the same resource path explicitly. NeoForge metadata uses `mcNeoForgeLoader.metadata`; the plugin extracts all descriptor-declared access transformers from embedded common artifacts and passes them to ModDevGradle.
+
+NeoForge loader modules may add their own access transformer:
+
+```kotlin
+mcNeoForgeLoader {
+    access {
+        neoForgeAccessTransformer("src/main/resources/META-INF/neoforge-accesstransformer.cfg")
+    }
+}
+```
+
+ModDevGradle receives both loader-local AT and extracted `merged` ATs. NeoForge metadata must list loader-local resource explicitly.
 
 Fabric mixins use Loom static remapping. Refmaps, the legacy Mixin annotation processor, and `loom.mixin` are not used.
 

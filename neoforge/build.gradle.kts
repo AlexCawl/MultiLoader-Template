@@ -27,7 +27,11 @@ base {
     archivesName = "$modId-${project.name}-$minecraftVersion"
 }
 
-mcMultiLoader {
+mcNeoForgeLoader {
+    access {
+        neoForgeAccessTransformer("src/main/resources/META-INF/neoforge-accesstransformer.cfg")
+    }
+
     metadata {
         resources {
             resource("META-INF/neoforge.mods.toml") {

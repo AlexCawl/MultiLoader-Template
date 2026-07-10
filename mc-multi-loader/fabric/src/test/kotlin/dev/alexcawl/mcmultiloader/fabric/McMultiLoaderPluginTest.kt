@@ -1,7 +1,7 @@
 package dev.alexcawl.mcmultiloader.fabric
 
-import dev.alexcawl.mcmultiloader.core.feature.DESCRIPTOR_PATH
-import dev.alexcawl.mcmultiloader.core.feature.FABRIC_ACCESS_WIDENER_PROPERTY
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.FABRIC_ACCESS_WIDENER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir

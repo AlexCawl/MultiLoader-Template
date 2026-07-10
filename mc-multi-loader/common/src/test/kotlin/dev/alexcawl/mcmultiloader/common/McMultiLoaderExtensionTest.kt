@@ -1,6 +1,6 @@
 package dev.alexcawl.mcmultiloader.common
 
-import dev.alexcawl.mcmultiloader.core.feature.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -26,7 +26,7 @@ class McMultiLoaderExtensionTest {
                 id("dev.alexcawl.mcmultiloader.common")
             }
             version = "1.2.3"
-            mcMultiLoader {
+            mcCommonLoader {
                 metadata {
                     resources {
                         resource("first.txt") { "value"(providers.provider { "first" }) }
@@ -80,7 +80,7 @@ class McMultiLoaderExtensionTest {
             "build.gradle.kts",
             """
             plugins { id("dev.alexcawl.mcmultiloader.common") }
-            mcMultiLoader {
+            mcCommonLoader {
                 access { fabricAccessWidener("src/main/resources/accesswidener") }
             }
             apply(plugin = "java-library")

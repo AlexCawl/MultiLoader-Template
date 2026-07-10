@@ -1,7 +1,7 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
-import dev.alexcawl.mcmultiloader.core.feature.DESCRIPTOR_PATH
-import dev.alexcawl.mcmultiloader.core.feature.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -31,7 +31,16 @@ class NeoForgePluginIsolationTest {
             }
             repositories { maven { url = uri("repo") } }
             dependencies { merged("com.example:common:1.0") }
+            mcNeoForgeLoader {
+                access {
+                    neoForgeAccessTransformer("src/main/resources/META-INF/neoforge-accesstransformer.cfg")
+                }
+            }
             """.trimIndent()
+        )
+        write(
+            "src/main/resources/META-INF/neoforge-accesstransformer.cfg",
+            "# NeoForge loader-specific access transformer",
         )
         writeMavenModule()
 

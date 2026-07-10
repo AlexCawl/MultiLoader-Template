@@ -1,15 +1,15 @@
-package dev.alexcawl.mcmultiloader.fabric.extension.impl
+package dev.alexcawl.mcmultiloader.neoforge.extension.impl
 
 import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
-import dev.alexcawl.mcmultiloader.fabric.access.AccessConfiguration
-import dev.alexcawl.mcmultiloader.fabric.extension.McFabricLoaderExtension
+import dev.alexcawl.mcmultiloader.neoforge.access.AccessConfiguration
+import dev.alexcawl.mcmultiloader.neoforge.extension.McNeoForgeLoaderExtension
 import org.gradle.api.Action
 import javax.inject.Inject
 
-internal abstract class McFabricLoaderExtensionImpl @Inject constructor(
+internal abstract class McNeoForgeLoaderExtensionImpl @Inject constructor(
     private val metadataConfiguration: MetadataConfiguration,
     private val accessConfiguration: AccessConfiguration,
-) : McFabricLoaderExtension {
+) : McNeoForgeLoaderExtension {
 
     override fun metadata(action: Action<in MetadataConfiguration>) {
         action.execute(metadataConfiguration)

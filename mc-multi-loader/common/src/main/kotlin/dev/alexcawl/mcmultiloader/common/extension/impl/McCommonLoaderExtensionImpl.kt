@@ -1,15 +1,15 @@
-package dev.alexcawl.mcmultiloader.fabric.extension.impl
+package dev.alexcawl.mcmultiloader.common.extension.impl
 
+import dev.alexcawl.mcmultiloader.common.access.AccessConfiguration
+import dev.alexcawl.mcmultiloader.common.extension.McCommonLoaderExtension
 import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
-import dev.alexcawl.mcmultiloader.fabric.access.AccessConfiguration
-import dev.alexcawl.mcmultiloader.fabric.extension.McFabricLoaderExtension
 import org.gradle.api.Action
 import javax.inject.Inject
 
-internal abstract class McFabricLoaderExtensionImpl @Inject constructor(
+internal abstract class McCommonLoaderExtensionImpl @Inject constructor(
     private val metadataConfiguration: MetadataConfiguration,
     private val accessConfiguration: AccessConfiguration,
-) : McFabricLoaderExtension {
+) : McCommonLoaderExtension {
 
     override fun metadata(action: Action<in MetadataConfiguration>) {
         action.execute(metadataConfiguration)
