@@ -9,6 +9,7 @@ import net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvableConfiguration
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
@@ -28,9 +29,10 @@ internal abstract class AccessFeatureImpl @Inject constructor(
     override fun install(
         artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
         directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
+        accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
     ) {
         with(configuration) {
-            project.configureAccess(fabricAccessWidener, artifacts, directArtifacts)
+            project.configureAccess(fabricAccessWidener, artifacts, directArtifacts, accessWideners)
         }
     }
 
@@ -38,8 +40,14 @@ internal abstract class AccessFeatureImpl @Inject constructor(
         fabricAccessWidener: Provider<RegularFile>,
         artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
         directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
+        accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
     ) {
-        val validation = registerAccessWidenerValidation(fabricAccessWidener, artifacts, directArtifacts)
+        val validation = registerAccessWidenerValidation(
+            fabricAccessWidener,
+            artifacts,
+            directArtifacts,
+            accessWideners,
+        )
 
         plugins.withType(JavaPlugin::class.java).configureEach {
             tasks.named(JavaPlugin.CLASSES_TASK_NAME) {
@@ -60,14 +68,23 @@ internal abstract class AccessFeatureImpl @Inject constructor(
         fabricAccessWidener: Provider<RegularFile>,
         artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
         directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
+        accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
     ): TaskProvider<ValidateFabricAccessWidenerTask> = tasks.register(
         VALIDATION_TASK_NAME,
         ValidateFabricAccessWidenerTask::class.java,
     ) {
         group = TASK_GROUP
         loaderAccessWidener.set(fabricAccessWidener)
+        this.accessWideners.from(accessWideners.lenientArtifactFiles())
         this.artifacts.from(artifacts)
         this.directArtifacts.from(directArtifacts)
         validationMarker.set(layout.buildDirectory.file(VALIDATION_MARKER))
     }
+
+    private fun NamedDomainObjectProvider<ResolvableConfiguration>.lenientArtifactFiles(): Provider<FileCollection> =
+        map { configuration ->
+            configuration.incoming.artifactView {
+                isLenient = true
+            }.files
+        }
 }

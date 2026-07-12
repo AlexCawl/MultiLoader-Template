@@ -1,6 +1,8 @@
 package dev.alexcawl.mcmultiloader.fabric
 
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_CLASSPATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.FABRIC_ACCESS_WIDENER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
@@ -133,6 +135,44 @@ class McMultiLoaderPluginTest {
                 jar.readText(LOADER_ACCESS_WIDENER_PATH),
             )
         }
+    }
+
+    @Test
+    fun `consumes fabric access widener variant from Gradle module metadata`() {
+        write("settings.gradle.kts", "rootProject.name = \"fabric-access-variant\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.fabric")
+            }
+            repositories { maven { url = uri("repo") } }
+            dependencies { merged("com.example:common:1.0") }
+            mcFabricLoader {
+                access { fabricAccessWidener("src/main/resources/$LOADER_ACCESS_WIDENER_PATH") }
+            }
+            tasks.register("verifyFabricAccessVariant") {
+                dependsOn("validateMcMultiLoaderFabricAccessWidener")
+                doLast {
+                    val resolvedFiles = configurations.getByName("$FABRIC_ACCESS_WIDENER_CLASSPATH").files
+                    val accessWideners = resolvedFiles
+                        .filter { it.extension != "jar" }
+                        .map { it.readText() }
+                    check(accessWideners.any { it.contains("accessible class com/example/Common") }) {
+                        "Resolved files: " + resolvedFiles.map { it.name }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        write(
+            "src/main/resources/$LOADER_ACCESS_WIDENER_PATH",
+            "accessWidener v2 named\naccessible class com/example/Common\n",
+        )
+        writeFabricAccessWidenerGradleModule()
+
+        runner("verifyFabricAccessVariant").build()
     }
 
     @Test
@@ -398,6 +438,59 @@ class McMultiLoaderPluginTest {
                 "$artifact.accesswidener" to "$fabricHeader\naccessible class com/example/${artifact.replaceFirstChar(Char::uppercase)}",
                 DESCRIPTOR_PATH to "schemaVersion=1\n$FABRIC_ACCESS_WIDENER_PROPERTY=$artifact.accesswidener\n",
             ),
+        )
+    }
+
+    private fun writeFabricAccessWidenerGradleModule() {
+        val directory = projectDir.resolve("repo/com/example/common/1.0").createDirectories()
+        directory.resolve("common-1.0.pom").writeText(
+            """
+            <project>
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>com.example</groupId>
+              <artifactId>common</artifactId>
+              <version>1.0</version>
+              <!-- do_not_remove: published-with-gradle-metadata -->
+            </project>
+            """.trimIndent()
+        )
+        ZipOutputStream(Files.newOutputStream(directory.resolve("common-1.0.jar"))).use { jar ->
+            jar.putNextEntry(ZipEntry("common.txt"))
+            jar.write("common".toByteArray())
+            jar.closeEntry()
+        }
+        directory.resolve("common-1.0.accesswidener")
+            .writeText("accessWidener v2 named\naccessible class com/example/Common\n")
+        directory.resolve("common-1.0.module").writeText(
+            """
+            {
+              "formatVersion": "1.1",
+              "component": {
+                "group": "com.example",
+                "module": "common",
+                "version": "1.0"
+              },
+              "variants": [
+                {
+                  "name": "runtimeElements",
+                  "attributes": {
+                    "org.gradle.category": "library",
+                    "org.gradle.libraryelements": "jar",
+                    "org.gradle.usage": "java-runtime"
+                  },
+                  "files": [{ "name": "common-1.0.jar", "url": "common-1.0.jar" }]
+                },
+                {
+                  "name": "$FABRIC_ACCESS_WIDENER_ELEMENTS",
+                  "attributes": {
+                    "dev.alexcawl.minecraft.accessModifier": "ACCESS_WIDENER",
+                    "dev.alexcawl.minecraft.loader": "FABRIC"
+                  },
+                  "files": [{ "name": "common-1.0.accesswidener", "url": "common-1.0.accesswidener" }]
+                }
+              ]
+            }
+            """.trimIndent()
         )
     }
 

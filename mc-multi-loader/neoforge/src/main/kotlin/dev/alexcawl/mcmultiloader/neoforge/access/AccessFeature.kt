@@ -13,6 +13,7 @@ interface AccessFeature {
     fun install(
         artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
         directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
+        accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
     )
 
     companion object {

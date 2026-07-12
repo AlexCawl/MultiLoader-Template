@@ -1,6 +1,7 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
@@ -92,6 +93,38 @@ class NeoForgePluginIsolationTest {
         assertContains(content, "public com.example.Feature value")
     }
 
+    @Test
+    fun `consumes access transformer variant from Gradle module metadata`() {
+        write("settings.gradle.kts", "rootProject.name = \"neoforge-access-variant\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.neoforge")
+            }
+            repositories { maven { url = uri("repo") } }
+            dependencies { merged("com.example:common:1.0") }
+            tasks.register("verifyNeoForgeAccessVariant") {
+                dependsOn("extractMcMultiLoaderNeoForgeAccessTransformers")
+            }
+            """.trimIndent()
+        )
+        writeNeoForgeAccessTransformerGradleModule()
+
+        GradleRunner.create()
+            .withProjectDir(projectDir.toFile())
+            .withArguments("verifyNeoForgeAccessVariant", "--stacktrace")
+            .withPluginClasspath()
+            .build()
+
+        val outputFiles = Files.list(projectDir.resolve("build/mc-multi-loader/access/neoforge")).use { files ->
+            files.toList()
+        }
+        assertEquals(1, outputFiles.size)
+        assertContains(outputFiles.single().toFile().readText(), "public com.example.Common value")
+    }
+
     private fun writeCommonMavenModule(
         artifact: String,
         dependencies: List<String> = emptyList(),
@@ -105,6 +138,58 @@ class NeoForgePluginIsolationTest {
                 "META-INF/$artifact-accesstransformer.cfg" to accessTransformer,
                 DESCRIPTOR_PATH to "schemaVersion=1\n$NEOFORGE_ACCESS_TRANSFORMER_PROPERTY=META-INF/$artifact-accesstransformer.cfg\n",
             ),
+        )
+    }
+
+    private fun writeNeoForgeAccessTransformerGradleModule() {
+        val directory = projectDir.resolve("repo/com/example/common/1.0").createDirectories()
+        directory.resolve("common-1.0.pom").writeText(
+            """
+            <project>
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>com.example</groupId>
+              <artifactId>common</artifactId>
+              <version>1.0</version>
+              <!-- do_not_remove: published-with-gradle-metadata -->
+            </project>
+            """.trimIndent()
+        )
+        ZipOutputStream(Files.newOutputStream(directory.resolve("common-1.0.jar"))).use { jar ->
+            jar.putNextEntry(ZipEntry("common.txt"))
+            jar.write("common".toByteArray())
+            jar.closeEntry()
+        }
+        directory.resolve("common-1.0.cfg").writeText("public com.example.Common value\n")
+        directory.resolve("common-1.0.module").writeText(
+            """
+            {
+              "formatVersion": "1.1",
+              "component": {
+                "group": "com.example",
+                "module": "common",
+                "version": "1.0"
+              },
+              "variants": [
+                {
+                  "name": "runtimeElements",
+                  "attributes": {
+                    "org.gradle.category": "library",
+                    "org.gradle.libraryelements": "jar",
+                    "org.gradle.usage": "java-runtime"
+                  },
+                  "files": [{ "name": "common-1.0.jar", "url": "common-1.0.jar" }]
+                },
+                {
+                  "name": "$NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS",
+                  "attributes": {
+                    "dev.alexcawl.minecraft.accessModifier": "ACCESS_TRANSFORMER",
+                    "dev.alexcawl.minecraft.loader": "NEOFORGE"
+                  },
+                  "files": [{ "name": "common-1.0.cfg", "url": "common-1.0.cfg" }]
+                }
+              ]
+            }
+            """.trimIndent()
         )
     }
 

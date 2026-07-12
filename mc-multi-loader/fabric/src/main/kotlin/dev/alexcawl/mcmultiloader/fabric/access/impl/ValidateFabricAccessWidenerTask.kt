@@ -26,6 +26,9 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
     abstract val loaderAccessWidener: RegularFileProperty
 
     @get:Classpath
+    abstract val accessWideners: ConfigurableFileCollection
+
+    @get:Classpath
     abstract val artifacts: ConfigurableFileCollection
 
     @get:Classpath
@@ -44,8 +47,12 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
         }
 
         val actual = readFabricAccessWidener(loaderFile.name, loaderFile.readText())
-        val expected = selectMergedArtifacts(artifacts.files, directArtifacts.files)
+        val variantExpected = accessWideners.files
+            .filter { it.isFile && it.extension != "jar" }
+            .map { readFabricAccessWidener(it.name, it.readText()) }
+        val fallbackExpected = selectMergedArtifacts(artifacts.files, directArtifacts.files)
             .mapNotNull(::readFabricAccessWidener)
+        val expected = (variantExpected + fallbackExpected).distinctBy { it.header to it.body }
         validateFabricAccessWidener(actual, expected)
 
         validationMarker.get().asFile.apply {

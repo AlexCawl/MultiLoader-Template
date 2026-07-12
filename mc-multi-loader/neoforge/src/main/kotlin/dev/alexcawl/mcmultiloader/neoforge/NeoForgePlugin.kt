@@ -1,7 +1,8 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
 import dev.alexcawl.mcmultiloader.core.configuration.configureMergedDependencies
-import dev.alexcawl.mcmultiloader.core.metadata.MetadataFeature
+import dev.alexcawl.mcmultiloader.core.configuration.configureNeoForgeAccessTransformerClasspath
+import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
 import dev.alexcawl.mcmultiloader.neoforge.access.AccessFeature
 import dev.alexcawl.mcmultiloader.neoforge.extension.McNeoForgeLoaderExtension
 import dev.alexcawl.mcmultiloader.neoforge.extension.impl.McNeoForgeLoaderExtensionImpl
@@ -13,16 +14,16 @@ import org.gradle.kotlin.dsl.newInstance
 class NeoForgePlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        val metadataFeature = MetadataFeature.create(target)
+        val metadataConfiguration: MetadataConfiguration = MetadataConfiguration.create(target)
         val accessFeature = AccessFeature.create(target)
         val mergedDependencies = target.configureMergedDependencies()
+        val accessTransformers = target.configureNeoForgeAccessTransformerClasspath(mergedDependencies.dependencies)
         val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(
-            metadataFeature.configuration,
+            metadataConfiguration,
             accessFeature.configuration,
         )
         target.extensions.add<McNeoForgeLoaderExtension>(EXTENSION_NAME, extension)
-        metadataFeature.install()
-        accessFeature.install(mergedDependencies.artifacts, mergedDependencies.directArtifacts)
+        accessFeature.install(mergedDependencies.artifacts, mergedDependencies.directArtifacts, accessTransformers)
     }
 
     companion object {

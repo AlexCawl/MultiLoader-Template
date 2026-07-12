@@ -1,6 +1,8 @@
 package dev.alexcawl.mcmultiloader.common
 
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -71,6 +73,76 @@ class McMultiLoaderExtensionTest {
                 "fabricAccessWidener=accesswidener"
             )
         }
+    }
+
+    @Test
+    fun `publishes access modifier variants`() {
+        write("settings.gradle.kts", "rootProject.name = \"access-variant-fixture\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins {
+                `java-library`
+                `maven-publish`
+                id("dev.alexcawl.mcmultiloader.common")
+            }
+            group = "com.example"
+            version = "1.0"
+            publishing {
+                publications {
+                    create<MavenPublication>("maven") { from(components["java"]) }
+                }
+                repositories { maven { url = uri("repo") } }
+            }
+            mcCommonLoader {
+                access {
+                    fabricAccessWidener("src/main/resources/accesswidener")
+                    neoForgeAccessTransformer("src/main/resources/META-INF/accesstransformer.cfg")
+                }
+            }
+            """.trimIndent()
+        )
+        write("src/main/resources/accesswidener", "accessWidener v2 named\n")
+        write("src/main/resources/META-INF/accesstransformer.cfg", "public com.example.Common value\n")
+
+        runner("publish").build()
+
+        val module = projectDir
+            .resolve("repo/com/example/access-variant-fixture/1.0/access-variant-fixture-1.0.module")
+            .toFile()
+            .readText()
+        assertContains(module, FABRIC_ACCESS_WIDENER_ELEMENTS)
+        assertContains(module, NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS)
+        assertContains(module, "\"dev.alexcawl.minecraft.loader\": \"FABRIC\"")
+        assertContains(module, "\"dev.alexcawl.minecraft.loader\": \"NEOFORGE\"")
+        assertContains(module, "\"dev.alexcawl.minecraft.accessModifier\": \"ACCESS_WIDENER\"")
+        assertContains(module, "\"dev.alexcawl.minecraft.accessModifier\": \"ACCESS_TRANSFORMER\"")
+    }
+
+    @Test
+    fun `does not create unconfigured access modifier variant`() {
+        write("settings.gradle.kts", "rootProject.name = \"missing-access-variant-fixture\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.common")
+            }
+            mcCommonLoader {
+                access { neoForgeAccessTransformer("src/main/resources/META-INF/accesstransformer.cfg") }
+            }
+            tasks.register("verifyAccessVariants") {
+                doLast {
+                    check(configurations.findByName("$FABRIC_ACCESS_WIDENER_ELEMENTS") == null)
+                    check(configurations.findByName("$NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS") != null)
+                }
+            }
+            """.trimIndent()
+        )
+        write("src/main/resources/META-INF/accesstransformer.cfg", "public com.example.Common value\n")
+
+        runner("verifyAccessVariants").build()
     }
 
     @Test

@@ -18,6 +18,9 @@ import java.util.zip.ZipFile
 abstract class ExtractNeoForgeAccessTransformersTask : DefaultTask() {
 
     @get:Classpath
+    abstract val accessTransformers: ConfigurableFileCollection
+
+    @get:Classpath
     abstract val artifacts: ConfigurableFileCollection
 
     @get:Classpath
@@ -31,21 +34,26 @@ abstract class ExtractNeoForgeAccessTransformersTask : DefaultTask() {
         val output = outputDirectory.get().asFile
         output.deleteRecursively()
         output.mkdirs()
-        selectMergedArtifacts(artifacts.files, directArtifacts.files).forEachIndexed { index, artifact ->
-            extractAccessTransformer(index, artifact, output)
+        val entries = accessTransformers.files
+            .filter { it.isFile && it.extension != "jar" }
+            .map { it.name to it.readText() } +
+            selectMergedArtifacts(artifacts.files, directArtifacts.files).mapNotNull(::readAccessTransformer)
+
+        entries.distinctBy { it.second }.forEachIndexed { index, (path, content) ->
+            val target = output.resolve("${index.toString().padStart(3, '0')}-${sanitize(path)}")
+            target.writeText(content)
         }
     }
 
-    private fun extractAccessTransformer(index: Int, artifact: File, outputDirectory: File) {
-        ZipFile(artifact).use { zip ->
-            val properties = zip.readDescriptor() ?: return
-            val path = properties.getProperty(McMultiLoaderConstants.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY) ?: return
+    private fun readAccessTransformer(artifact: File): Pair<String, String>? {
+        return ZipFile(artifact).use { zip ->
+            val properties = zip.readDescriptor() ?: return null
+            val path = properties.getProperty(McMultiLoaderConstants.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY) ?: return null
             val entry = zip.getEntry(path)
                 ?: throw GradleException(
                     "NeoForge access transformer '$path' declared by '${artifact.name}' was not found."
                 )
-            val output = outputDirectory.resolve("${index.toString().padStart(3, '0')}-${sanitize(path)}")
-            zip.getInputStream(entry).use { input -> output.outputStream().use(input::copyTo) }
+            path to zip.getInputStream(entry).bufferedReader().use { it.readText() }
         }
     }
 
