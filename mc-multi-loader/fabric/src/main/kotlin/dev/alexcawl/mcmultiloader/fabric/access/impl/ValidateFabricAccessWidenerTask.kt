@@ -1,6 +1,5 @@
 package dev.alexcawl.mcmultiloader.fabric.access.impl
 
-import dev.alexcawl.mcmultiloader.core.configuration.selectMergedArtifacts
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -28,12 +27,6 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
     @get:Classpath
     abstract val accessWideners: ConfigurableFileCollection
 
-    @get:Classpath
-    abstract val artifacts: ConfigurableFileCollection
-
-    @get:Classpath
-    abstract val directArtifacts: ConfigurableFileCollection
-
     @get:OutputFile
     abstract val validationMarker: RegularFileProperty
 
@@ -50,9 +43,7 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
         val variantExpected = accessWideners.files
             .filter { it.isFile && it.extension != "jar" }
             .map { readFabricAccessWidener(it.name, it.readText()) }
-        val fallbackExpected = selectMergedArtifacts(artifacts.files, directArtifacts.files)
-            .mapNotNull(::readFabricAccessWidener)
-        val expected = (variantExpected + fallbackExpected).distinctBy { it.header to it.body }
+        val expected = variantExpected.distinctBy { it.header to it.body }
         validateFabricAccessWidener(actual, expected)
 
         validationMarker.get().asFile.apply {

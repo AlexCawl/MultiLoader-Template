@@ -20,14 +20,6 @@ internal abstract class AccessConfigurationImpl @Inject constructor(
 
     private val neoForgeAccessTransformer: RegularFileProperty = objects.fileProperty()
 
-    init {
-        with(project) {
-            plugins.withType<JavaPlugin> {
-                configureCommonAccess(fabricAccessWidener, neoForgeAccessTransformer)
-            }
-        }
-    }
-
     override fun fabricAccessWidener(path: String) {
         fabricAccessWidener.set(layout.projectDirectory.file(path))
         with(project) {

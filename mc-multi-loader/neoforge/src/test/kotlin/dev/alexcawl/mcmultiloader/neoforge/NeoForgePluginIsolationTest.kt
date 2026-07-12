@@ -1,8 +1,6 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.NEOFORGE_ACCESS_TRANSFORMER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -58,7 +56,7 @@ class NeoForgePluginIsolationTest {
     }
 
     @Test
-    fun `extracts access transformers from descriptor-bearing artifacts`() {
+    fun `does not extract access transformers from POM-only artifacts`() {
         write("settings.gradle.kts", "rootProject.name = \"neoforge-access\"")
         write(
             "build.gradle.kts",
@@ -87,10 +85,7 @@ class NeoForgePluginIsolationTest {
         val outputFiles = Files.list(projectDir.resolve("build/mc-multi-loader/access/neoforge")).use { files ->
             files.toList().sortedBy { it.fileName.toString() }
         }
-        assertEquals(2, outputFiles.size)
-        val content = outputFiles.joinToString("\n") { it.toFile().readText() }
-        assertContains(content, "public com.example.Base value")
-        assertContains(content, "public com.example.Feature value")
+        assertEquals(0, outputFiles.size)
     }
 
     @Test
@@ -136,7 +131,6 @@ class NeoForgePluginIsolationTest {
             mapOf(
                 "$artifact.txt" to artifact,
                 "META-INF/$artifact-accesstransformer.cfg" to accessTransformer,
-                DESCRIPTOR_PATH to "schemaVersion=1\n$NEOFORGE_ACCESS_TRANSFORMER_PROPERTY=META-INF/$artifact-accesstransformer.cfg\n",
             ),
         )
     }

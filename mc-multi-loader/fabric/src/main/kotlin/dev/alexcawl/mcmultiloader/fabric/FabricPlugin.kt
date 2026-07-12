@@ -19,8 +19,6 @@ class FabricPlugin : Plugin<Project> {
         val accessWideners = target.configureFabricAccessWidenerClasspath(mergedDependencies.dependencies)
         val accessConfiguration = AccessConfiguration.create(
             target,
-            mergedDependencies.artifacts,
-            mergedDependencies.directArtifacts,
             accessWideners,
         )
         val extension = target.objects.newInstance<McFabricLoaderExtensionImpl>(

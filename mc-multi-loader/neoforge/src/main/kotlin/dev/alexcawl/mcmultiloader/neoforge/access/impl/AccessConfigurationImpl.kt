@@ -13,8 +13,6 @@ import javax.inject.Inject
 internal abstract class AccessConfigurationImpl @Inject constructor(
     project: Project,
     private val layout: ProjectLayout,
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
     objects: ObjectFactory,
 ) : AccessConfiguration {
@@ -24,8 +22,6 @@ internal abstract class AccessConfigurationImpl @Inject constructor(
     init {
         project.configureAccess(
             neoForgeAccessTransformer,
-            artifacts,
-            directArtifacts,
             accessTransformers,
         )
     }

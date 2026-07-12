@@ -17,14 +17,10 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 internal fun Project.configureAccess(
     fabricAccessWidener: Provider<RegularFile>,
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
 ) {
     val validation = registerAccessWidenerValidation(
         fabricAccessWidener,
-        artifacts,
-        directArtifacts,
         accessWideners,
     )
 
@@ -45,8 +41,6 @@ internal fun Project.configureAccess(
 
 private fun Project.registerAccessWidenerValidation(
     fabricAccessWidener: Provider<RegularFile>,
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
 ): TaskProvider<ValidateFabricAccessWidenerTask> = tasks.register(
     VALIDATION_TASK_NAME,
@@ -55,8 +49,6 @@ private fun Project.registerAccessWidenerValidation(
     group = TASK_GROUP
     loaderAccessWidener.set(fabricAccessWidener)
     this.accessWideners.from(accessWideners.lenientArtifactFiles())
-    this.artifacts.from(artifacts)
-    this.directArtifacts.from(directArtifacts)
     validationMarker.set(layout.buildDirectory.file(VALIDATION_MARKER))
 }
 

@@ -1,9 +1,7 @@
 package dev.alexcawl.mcmultiloader.fabric
 
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_CLASSPATH
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.FABRIC_ACCESS_WIDENER_PROPERTY
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -40,12 +38,6 @@ class McMultiLoaderPluginTest {
                 jar.readText(LOADER_ACCESS_WIDENER_PATH),
             )
         }
-        ZipFile(projectDir.resolve("common/build/libs/common.jar").toFile()).use { jar ->
-            assertContains(
-                jar.readText(DESCRIPTOR_PATH),
-                "$FABRIC_ACCESS_WIDENER_PROPERTY=accesswidener",
-            )
-        }
         assertEquals("ok\n", projectDir.resolve("app/build/mc-multi-loader/access/fabric/validated.marker").toFile().readText())
     }
 
@@ -77,7 +69,7 @@ class McMultiLoaderPluginTest {
     }
 
     @Test
-    fun `publishes and consumes common module descriptor`() {
+    fun `merges published Maven module directly`() {
         val producer = projectDir.resolve("producer")
         val consumer = projectDir.resolve("consumer")
         val repository = projectDir.resolve("published")
@@ -100,8 +92,6 @@ class McMultiLoaderPluginTest {
             }
             """.trimIndent()
         )
-        write(producer, "src/main/resources/accesswidener", "accessWidener v2 named\naccessible class com/example/Common")
-        write(producer, "src/main/resources/$DESCRIPTOR_PATH", "schemaVersion=1\n$FABRIC_ACCESS_WIDENER_PROPERTY=accesswidener\n")
         write(producer, "src/main/resources/common.txt", "published")
         write(producer, "src/main/java/com/example/Common.java", "package com.example; public final class Common {}")
 
@@ -211,7 +201,7 @@ class McMultiLoaderPluginTest {
     }
 
     @Test
-    fun `merges transitive common project dependency`() {
+    fun `does not embed transitive project dependency`() {
         write(
             "settings.gradle.kts",
             """
@@ -239,7 +229,6 @@ class McMultiLoaderPluginTest {
             "app/src/main/resources/$LOADER_ACCESS_WIDENER_PATH",
             """
             accessWidener v2 named
-            accessible class com/example/Base
             accessible class com/example/Common
             """.trimIndent(),
         )
@@ -247,19 +236,18 @@ class McMultiLoaderPluginTest {
         runner(":app:jar").build()
 
         ZipFile(projectDir.resolve("app/build/libs/app.jar").toFile()).use { jar ->
-            assertEquals("base-value", jar.readText("common-base.txt"))
             assertEquals("common-value", jar.readText("common.txt"))
-            assertNotNull(jar.getEntry("com/example/Base.class"))
             assertNotNull(jar.getEntry("com/example/Common.class"))
+            assertNull(jar.getEntry("common-base.txt"))
+            assertNull(jar.getEntry("com/example/Base.class"))
             val accessWidener = jar.readText(LOADER_ACCESS_WIDENER_PATH)
             assertEquals(1, Regex("^accessWidener", RegexOption.MULTILINE).findAll(accessWidener).count())
-            assertContains(accessWidener, "accessible class com/example/Base")
             assertContains(accessWidener, "accessible class com/example/Common")
         }
     }
 
     @Test
-    fun `does not embed transitive artifact without descriptor`() {
+    fun `does not embed transitive Maven artifact`() {
         write("settings.gradle.kts", "rootProject.name = \"plain-transitive-fixture\"")
         write(
             "build.gradle.kts",
@@ -311,8 +299,14 @@ class McMultiLoaderPluginTest {
             "src/main/resources/$LOADER_ACCESS_WIDENER_PATH",
             "accessWidener v2 named\naccessible class com/example/First\naccessible class com/example/Second",
         )
-        writeCommonMavenModule("first", fabricHeader = "accessWidener v2 named")
-        writeCommonMavenModule("second", fabricHeader = "accessWidener v2 intermediary")
+        writeFabricAccessWidenerGradleModule(
+            "first",
+            "accessWidener v2 named\naccessible class com/example/First\n",
+        )
+        writeFabricAccessWidenerGradleModule(
+            "second",
+            "accessWidener v2 intermediary\naccessible class com/example/Second\n",
+        )
 
         val result = runner("jar").buildAndFail()
 
@@ -347,10 +341,25 @@ class McMultiLoaderPluginTest {
 
     @Test
     fun `fails when fabric access widener is missing common entries`() {
-        writeProjectFixture()
-        write("app/src/main/resources/$LOADER_ACCESS_WIDENER_PATH", "accessWidener v2 named\n")
+        write("settings.gradle.kts", "rootProject.name = \"missing-common-aw-entry-fixture\"")
+        write(
+            "build.gradle.kts",
+            """
+            plugins {
+                `java-library`
+                id("dev.alexcawl.mcmultiloader.fabric")
+            }
+            repositories { maven { url = uri("repo") } }
+            dependencies { merged("com.example:common:1.0") }
+            mcFabricLoader {
+                access { fabricAccessWidener("src/main/resources/$LOADER_ACCESS_WIDENER_PATH") }
+            }
+            """.trimIndent()
+        )
+        write("src/main/resources/$LOADER_ACCESS_WIDENER_PATH", "accessWidener v2 named\n")
+        writeFabricAccessWidenerGradleModule()
 
-        val result = runner(":app:jar").buildAndFail()
+        val result = runner("jar").buildAndFail()
 
         assertContains(result.output, "Fabric access widener 'fabric.accesswidener' is missing entries")
         assertContains(result.output, "accessible class com/example/Common")
@@ -397,7 +406,6 @@ class McMultiLoaderPluginTest {
         )
         write("common/src/main/resources/common.txt", "common-value")
         write("common/src/main/resources/accesswidener", "accessWidener v2 named\naccessible class com/example/Common")
-        write("common/src/main/resources/$DESCRIPTOR_PATH", "schemaVersion=1\n$FABRIC_ACCESS_WIDENER_PROPERTY=accesswidener\n")
         write("app/src/main/resources/app.txt", "app-value")
         write("app/src/main/resources/$LOADER_ACCESS_WIDENER_PATH", "accessWidener v2 named\naccessible class com/example/Common\n")
         write("common/src/main/java/com/example/Common.java", "package com.example; public final class Common {}")
@@ -418,7 +426,6 @@ class McMultiLoaderPluginTest {
         )
         write("$name/src/main/resources/$name.txt", "${name.removePrefix("common-")}-value")
         write("$name/src/main/resources/$accessWidener", "accessWidener v2 named\naccessible class com/example/$className")
-        write("$name/src/main/resources/$DESCRIPTOR_PATH", "schemaVersion=1\n$FABRIC_ACCESS_WIDENER_PROPERTY=$accessWidener\n")
         write(
             "$name/src/main/java/com/example/$className.java",
             "package com.example; public final class $className {}",
@@ -436,38 +443,39 @@ class McMultiLoaderPluginTest {
             mapOf(
                 "$artifact.txt" to artifact,
                 "$artifact.accesswidener" to "$fabricHeader\naccessible class com/example/${artifact.replaceFirstChar(Char::uppercase)}",
-                DESCRIPTOR_PATH to "schemaVersion=1\n$FABRIC_ACCESS_WIDENER_PROPERTY=$artifact.accesswidener\n",
             ),
         )
     }
 
-    private fun writeFabricAccessWidenerGradleModule() {
-        val directory = projectDir.resolve("repo/com/example/common/1.0").createDirectories()
-        directory.resolve("common-1.0.pom").writeText(
+    private fun writeFabricAccessWidenerGradleModule(
+        artifact: String = "common",
+        accessWidener: String = "accessWidener v2 named\naccessible class com/example/Common\n",
+    ) {
+        val directory = projectDir.resolve("repo/com/example/$artifact/1.0").createDirectories()
+        directory.resolve("$artifact-1.0.pom").writeText(
             """
             <project>
               <modelVersion>4.0.0</modelVersion>
               <groupId>com.example</groupId>
-              <artifactId>common</artifactId>
+              <artifactId>$artifact</artifactId>
               <version>1.0</version>
               <!-- do_not_remove: published-with-gradle-metadata -->
             </project>
             """.trimIndent()
         )
-        ZipOutputStream(Files.newOutputStream(directory.resolve("common-1.0.jar"))).use { jar ->
-            jar.putNextEntry(ZipEntry("common.txt"))
-            jar.write("common".toByteArray())
+        ZipOutputStream(Files.newOutputStream(directory.resolve("$artifact-1.0.jar"))).use { jar ->
+            jar.putNextEntry(ZipEntry("$artifact.txt"))
+            jar.write(artifact.toByteArray())
             jar.closeEntry()
         }
-        directory.resolve("common-1.0.accesswidener")
-            .writeText("accessWidener v2 named\naccessible class com/example/Common\n")
-        directory.resolve("common-1.0.module").writeText(
+        directory.resolve("$artifact-1.0.accesswidener").writeText(accessWidener)
+        directory.resolve("$artifact-1.0.module").writeText(
             """
             {
               "formatVersion": "1.1",
               "component": {
                 "group": "com.example",
-                "module": "common",
+                "module": "$artifact",
                 "version": "1.0"
               },
               "variants": [
@@ -478,7 +486,7 @@ class McMultiLoaderPluginTest {
                     "org.gradle.libraryelements": "jar",
                     "org.gradle.usage": "java-runtime"
                   },
-                  "files": [{ "name": "common-1.0.jar", "url": "common-1.0.jar" }]
+                  "files": [{ "name": "$artifact-1.0.jar", "url": "$artifact-1.0.jar" }]
                 },
                 {
                   "name": "$FABRIC_ACCESS_WIDENER_ELEMENTS",
@@ -486,7 +494,7 @@ class McMultiLoaderPluginTest {
                     "dev.alexcawl.minecraft.accessModifier": "ACCESS_WIDENER",
                     "dev.alexcawl.minecraft.loader": "FABRIC"
                   },
-                  "files": [{ "name": "common-1.0.accesswidener", "url": "common-1.0.accesswidener" }]
+                  "files": [{ "name": "$artifact-1.0.accesswidener", "url": "$artifact-1.0.accesswidener" }]
                 }
               ]
             }

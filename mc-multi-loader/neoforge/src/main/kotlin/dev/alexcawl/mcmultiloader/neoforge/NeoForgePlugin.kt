@@ -19,8 +19,6 @@ class NeoForgePlugin : Plugin<Project> {
         val accessTransformers = target.configureNeoForgeAccessTransformerClasspath(mergedDependencies.dependencies)
         val accessConfiguration = AccessConfiguration.create(
             target,
-            mergedDependencies.artifacts,
-            mergedDependencies.directArtifacts,
             accessTransformers,
         )
         val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(

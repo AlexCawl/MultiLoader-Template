@@ -15,11 +15,9 @@ import org.gradle.api.tasks.TaskProvider
 
 internal fun Project.configureAccess(
     neoForgeAccessTransformer: Provider<RegularFile>,
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
 ) {
-    val extraction = registerAccessTransformerExtraction(artifacts, directArtifacts, accessTransformers)
+    val extraction = registerAccessTransformerExtraction(accessTransformers)
     plugins.withType(ModDevPlugin::class.java).configureEach {
         extensions.getByType(NeoForgeExtension::class.java).accessTransformers.from(
             neoForgeAccessTransformer,
@@ -29,8 +27,6 @@ internal fun Project.configureAccess(
 }
 
 private fun Project.registerAccessTransformerExtraction(
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
 ): TaskProvider<ExtractNeoForgeAccessTransformersTask> = tasks.register(
     EXTRACTION_TASK_NAME,
@@ -38,8 +34,6 @@ private fun Project.registerAccessTransformerExtraction(
 ) {
     group = TASK_GROUP
     this.accessTransformers.from(accessTransformers.lenientArtifactFiles())
-    this.artifacts.from(artifacts)
-    this.directArtifacts.from(directArtifacts)
     outputDirectory.set(layout.buildDirectory.dir(EXTRACTION_OUTPUT_DIRECTORY))
 }
 

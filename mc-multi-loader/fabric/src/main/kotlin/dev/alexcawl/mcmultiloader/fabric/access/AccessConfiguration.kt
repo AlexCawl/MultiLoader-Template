@@ -18,13 +18,9 @@ interface AccessConfiguration {
 
         fun create(
             project: Project,
-            artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-            directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
             accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
         ): AccessConfiguration {
             return project.objects.newInstance<AccessConfigurationImpl>(
-                artifacts,
-                directArtifacts,
                 accessWideners,
             )
         }

@@ -15,8 +15,6 @@ import javax.inject.Inject
 internal abstract class AccessConfigurationImpl @Inject constructor(
     project: Project,
     private val layout: ProjectLayout,
-    artifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
-    directArtifacts: NamedDomainObjectProvider<ResolvableConfiguration>,
     accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
     objects: ObjectFactory,
 ) : AccessConfiguration {
@@ -26,7 +24,7 @@ internal abstract class AccessConfigurationImpl @Inject constructor(
     init {
         with(project) {
             plugins.withType<JavaPlugin> {
-                configureAccess(fabricAccessWidener, artifacts, directArtifacts, accessWideners)
+                configureAccess(fabricAccessWidener, accessWideners)
             }
         }
     }

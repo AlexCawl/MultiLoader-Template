@@ -33,10 +33,6 @@ object McMultiLoaderConstants {
         const val NEOFORGE_ACCESS_TRANSFORMER_CLASSPATH_DESCRIPTION = "NeoForge access transformers resolved from merged dependencies."
     }
 
-    const val DESCRIPTOR_PATH = "META-INF/mc-multi-loader/common.properties"
-    const val FABRIC_ACCESS_WIDENER_PROPERTY = "fabricAccessWidener"
-    const val NEOFORGE_ACCESS_TRANSFORMER_PROPERTY = "neoForgeAccessTransformer"
-
     const val MERGED_DEPENDENCY_TYPE_ERROR =
         "Configuration '%s' only supports project or external module dependencies."
 }

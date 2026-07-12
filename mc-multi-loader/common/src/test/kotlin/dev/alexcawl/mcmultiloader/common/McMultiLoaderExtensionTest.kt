@@ -1,6 +1,5 @@
 package dev.alexcawl.mcmultiloader.common
 
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.DESCRIPTOR_PATH
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_ELEMENTS
 import org.gradle.testkit.runner.GradleRunner
@@ -68,10 +67,6 @@ class McMultiLoaderExtensionTest {
             assertEquals("shared", jar.getInputStream(jar.getJarEntry("b/shared.txt")).bufferedReader().readText())
             assertEquals("provider", jar.getInputStream(jar.getJarEntry("dynamic")).bufferedReader().readText())
             assertEquals("1.2.3", jar.manifest.mainAttributes.getValue("Implementation-Version"))
-            assertContains(
-                jar.getInputStream(jar.getJarEntry(DESCRIPTOR_PATH)).bufferedReader().readText(),
-                "fabricAccessWidener=accesswidener"
-            )
         }
     }
 
@@ -156,18 +151,16 @@ class McMultiLoaderExtensionTest {
                 access { fabricAccessWidener("src/main/resources/accesswidener") }
             }
             apply(plugin = "java-library")
+            tasks.register("verifyAccessVariants") {
+                doLast {
+                    check(configurations.findByName("$FABRIC_ACCESS_WIDENER_ELEMENTS") != null)
+                }
+            }
             """.trimIndent()
         )
         write("src/main/resources/accesswidener", "accessWidener v2 named\n")
 
-        runner("jar").build()
-
-        JarFile(projectDir.resolve("build/libs/plugin-order-fixture.jar").toFile()).use { jar ->
-            assertContains(
-                jar.getInputStream(jar.getJarEntry(DESCRIPTOR_PATH)).bufferedReader().readText(),
-                "fabricAccessWidener=accesswidener"
-            )
-        }
+        runner("verifyAccessVariants").build()
     }
 
     private fun write(path: String, content: String) {

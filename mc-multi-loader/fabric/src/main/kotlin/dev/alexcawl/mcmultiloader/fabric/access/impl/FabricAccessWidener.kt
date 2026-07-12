@@ -1,10 +1,6 @@
 package dev.alexcawl.mcmultiloader.fabric.access.impl
 
-import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants
 import org.gradle.api.GradleException
-import java.io.File
-import java.util.Properties
-import java.util.zip.ZipFile
 
 internal data class FabricAccessWidener(
     val source: String,
@@ -16,16 +12,6 @@ private data class MissingLine(
     val source: String,
     val line: String,
 )
-
-internal fun readFabricAccessWidener(artifact: File): FabricAccessWidener? = ZipFile(artifact).use { zip ->
-    val properties = zip.readDescriptor() ?: return null
-    val path = properties.getProperty(McMultiLoaderConstants.FABRIC_ACCESS_WIDENER_PROPERTY) ?: return null
-    val entry = zip.getEntry(path)
-        ?: throw GradleException("Fabric access widener '$path' declared by '${artifact.name}' was not found.")
-    zip.getInputStream(entry).bufferedReader().use { reader ->
-        readFabricAccessWidener("${artifact.name}!$path", reader.readText())
-    }
-}
 
 internal fun readFabricAccessWidener(source: String, content: String): FabricAccessWidener {
     val lines = content.lines()
@@ -56,11 +42,6 @@ internal fun validateFabricAccessWidener(
     if (missing.isNotEmpty()) {
         throw GradleException(buildMissingLinesMessage(actual.source, missing))
     }
-}
-
-private fun ZipFile.readDescriptor(): Properties? {
-    val entry = getEntry(McMultiLoaderConstants.DESCRIPTOR_PATH) ?: return null
-    return Properties().also { properties -> getInputStream(entry).use(properties::load) }
 }
 
 private fun isHeader(line: String): Boolean = line.trim().let { it.isNotEmpty() && !it.startsWith("#") }
