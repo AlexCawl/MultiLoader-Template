@@ -1,0 +1,28 @@
+package dev.alexcawl.mcmultiloader.common.access.impl
+
+import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants
+import dev.alexcawl.mcmultiloader.core.attributes.AccessModifierType
+import dev.alexcawl.mcmultiloader.core.attributes.LoaderType
+import org.gradle.api.NamedDomainObjectProvider
+import org.gradle.api.Project
+import org.gradle.api.artifacts.ConsumableConfiguration
+import org.gradle.api.file.RegularFileProperty
+
+private const val OUTGOING_ACCESS_WIDENER_TYPE = "access-widener"
+private const val OUTGOING_ACCESS_WIDENER_EXTENSION = "accesswidener"
+
+internal fun Project.fabricAccessWidenerElements(
+    accessWidener: RegularFileProperty,
+): NamedDomainObjectProvider<ConsumableConfiguration> {
+    return configurations.consumable(McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS) {
+        description = McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_ELEMENTS_DESCRIPTION
+        attributes {
+            attribute(LoaderType.ATTRIBUTE, LoaderType.FABRIC)
+            attribute(AccessModifierType.ATTRIBUTE, AccessModifierType.ACCESS_WIDENER)
+        }
+        outgoing.artifact(accessWidener) {
+            type = OUTGOING_ACCESS_WIDENER_TYPE
+            extension = OUTGOING_ACCESS_WIDENER_EXTENSION
+        }
+    }
+}

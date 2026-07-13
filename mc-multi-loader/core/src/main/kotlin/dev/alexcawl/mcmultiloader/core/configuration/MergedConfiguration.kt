@@ -1,8 +1,6 @@
 package dev.alexcawl.mcmultiloader.core.configuration
 
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants
-import dev.alexcawl.mcmultiloader.core.attributes.AccessModifierType
-import dev.alexcawl.mcmultiloader.core.attributes.LoaderType
 import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
@@ -11,8 +9,6 @@ import org.gradle.api.artifacts.DependencyScopeConfiguration
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.ResolvableConfiguration
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 
@@ -29,9 +25,9 @@ data class MergedDependencies(
 )
 
 fun Project.configureMergedDependencies(): MergedDependencies {
-    val merged = configureMergedDependencyScope()
-    val artifacts = configureMergedArtifactClasspath(merged)
-    val directArtifacts = configureDirectMergedArtifactClasspath(merged)
+    val merged = merged()
+    val artifacts = mergedArtifact(merged)
+    val directArtifacts = directMergedArtifact(merged)
     val commonTrees = providers.provider {
         requireSupportedDependencies(merged.get())
         selectMergedArtifacts(artifacts.get().files, directArtifacts.get().files).map(::zipTree)
@@ -54,65 +50,6 @@ fun Project.configureMergedDependencies(): MergedDependencies {
     }
 
     return MergedDependencies(merged, artifacts, directArtifacts)
-}
-
-fun Project.configureFabricAccessWidenerClasspath(
-    merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
-): NamedDomainObjectProvider<ResolvableConfiguration> {
-    return configurations.resolvable(McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_CLASSPATH) {
-        description = McMultiLoaderConstants.Configuration.FABRIC_ACCESS_WIDENER_CLASSPATH_DESCRIPTION
-        extendsFrom(merged.get())
-        attributes {
-            attribute(LoaderType.ATTRIBUTE, LoaderType.FABRIC)
-            attribute(AccessModifierType.ATTRIBUTE, AccessModifierType.ACCESS_WIDENER)
-        }
-    }
-}
-
-fun Project.configureNeoForgeAccessTransformerClasspath(
-    merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
-): NamedDomainObjectProvider<ResolvableConfiguration> {
-    return configurations.resolvable(McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_CLASSPATH) {
-        description = McMultiLoaderConstants.Configuration.NEOFORGE_ACCESS_TRANSFORMER_CLASSPATH_DESCRIPTION
-        extendsFrom(merged.get())
-        attributes {
-            attribute(LoaderType.ATTRIBUTE, LoaderType.NEOFORGE)
-            attribute(AccessModifierType.ATTRIBUTE, AccessModifierType.ACCESS_TRANSFORMER)
-        }
-    }
-}
-
-private fun Project.configureMergedDependencyScope(): NamedDomainObjectProvider<DependencyScopeConfiguration> =
-    configurations.dependencyScope(McMultiLoaderConstants.Configuration.MERGED) {
-        description = McMultiLoaderConstants.Configuration.MERGED_DESCRIPTION
-    }
-
-private fun Project.configureMergedArtifactClasspath(
-    merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
-): NamedDomainObjectProvider<ResolvableConfiguration> = configurations.resolvable(
-    McMultiLoaderConstants.Configuration.MERGED_ARTIFACT,
-) {
-    description = McMultiLoaderConstants.Configuration.MERGED_ARTIFACT_DESCRIPTION
-    isTransitive = true
-    extendsFrom(merged.get())
-    attributes {
-        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
-        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.LIBRARY))
-    }
-}
-
-private fun Project.configureDirectMergedArtifactClasspath(
-    merged: NamedDomainObjectProvider<DependencyScopeConfiguration>,
-): NamedDomainObjectProvider<ResolvableConfiguration> = configurations.resolvable(
-    McMultiLoaderConstants.Configuration.DIRECT_MERGED_ARTIFACT,
-) {
-    description = McMultiLoaderConstants.Configuration.DIRECT_MERGED_ARTIFACT_DESCRIPTION
-    isTransitive = false
-    extendsFrom(merged.get())
-    attributes {
-        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
-        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.LIBRARY))
-    }
 }
 
 private fun requireSupportedDependencies(merged: Configuration) {

@@ -1,7 +1,7 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
 import dev.alexcawl.mcmultiloader.core.configuration.configureMergedDependencies
-import dev.alexcawl.mcmultiloader.core.configuration.configureNeoForgeAccessTransformerClasspath
+import dev.alexcawl.mcmultiloader.neoforge.configuration.neoForgeAccessTransformerClasspath
 import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
 import dev.alexcawl.mcmultiloader.neoforge.access.AccessConfiguration
 import dev.alexcawl.mcmultiloader.neoforge.extension.McNeoForgeLoaderExtension
@@ -16,7 +16,7 @@ class NeoForgePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val metadataConfiguration: MetadataConfiguration = MetadataConfiguration.create(target)
         val mergedDependencies = target.configureMergedDependencies()
-        val accessTransformers = target.configureNeoForgeAccessTransformerClasspath(mergedDependencies.dependencies)
+        val accessTransformers = target.neoForgeAccessTransformerClasspath(mergedDependencies.dependencies)
         val accessConfiguration = AccessConfiguration.create(
             target,
             accessTransformers,

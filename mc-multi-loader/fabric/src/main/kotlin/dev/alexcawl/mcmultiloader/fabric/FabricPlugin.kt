@@ -1,6 +1,6 @@
 package dev.alexcawl.mcmultiloader.fabric
 
-import dev.alexcawl.mcmultiloader.core.configuration.configureFabricAccessWidenerClasspath
+import dev.alexcawl.mcmultiloader.fabric.configuration.fabricAccessWidenerClasspath
 import dev.alexcawl.mcmultiloader.core.configuration.configureMergedDependencies
 import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
 import dev.alexcawl.mcmultiloader.fabric.access.AccessConfiguration
@@ -16,7 +16,7 @@ class FabricPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val metadataConfiguration = MetadataConfiguration.create(target)
         val mergedDependencies = target.configureMergedDependencies()
-        val accessWideners = target.configureFabricAccessWidenerClasspath(mergedDependencies.dependencies)
+        val accessWideners = target.fabricAccessWidenerClasspath(mergedDependencies.dependencies)
         val accessConfiguration = AccessConfiguration.create(
             target,
             accessWideners,
