@@ -1,4 +1,4 @@
-package dev.alexcawl.mcmultiloader.core.configuration
+package dev.alexcawl.mcmultiloader.core
 
 import org.gradle.api.attributes.Attribute
 
@@ -11,6 +11,6 @@ enum class LoaderType {
 
         const val ATTRIBUTE_NAME = "dev.alexcawl.mcmultiloader.loaderType"
 
-        val ATTRIBUTE = Attribute.of<LoaderType>(ATTRIBUTE_NAME, LoaderType::class.java)
+        val ATTRIBUTE: Attribute<LoaderType> = Attribute.of<LoaderType>(ATTRIBUTE_NAME, LoaderType::class.java)
     }
 }

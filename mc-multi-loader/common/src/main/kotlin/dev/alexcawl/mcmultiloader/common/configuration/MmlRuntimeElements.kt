@@ -1,6 +1,6 @@
 package dev.alexcawl.mcmultiloader.common.configuration
 
-import dev.alexcawl.mcmultiloader.core.configuration.LoaderType
+import dev.alexcawl.mcmultiloader.core.LoaderType
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConsumableConfiguration

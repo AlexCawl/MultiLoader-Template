@@ -1,8 +1,8 @@
 package dev.alexcawl.mcmultiloader.common.access.impl
 
 import dev.alexcawl.mcmultiloader.core.McMultiLoaderConstants
-import dev.alexcawl.mcmultiloader.core.access.AccessModifierType
-import dev.alexcawl.mcmultiloader.core.configuration.LoaderType
+import dev.alexcawl.mcmultiloader.core.AccessModifierType
+import dev.alexcawl.mcmultiloader.core.LoaderType
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConsumableConfiguration
