@@ -1,8 +1,5 @@
 package dev.alexcawl.mcmultiloader.core.metadata.impl
 
-import dev.alexcawl.mcmultiloader.core.metadata.impl.MetadataConstants.JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY
-import dev.alexcawl.mcmultiloader.core.metadata.impl.MetadataConstants.RESOURCE_EXPANDS_ATTRIBUTES_INPUT_PROPERTY
-import dev.alexcawl.mcmultiloader.core.metadata.impl.MetadataConstants.RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -19,15 +16,17 @@ internal fun Project.metadataFeature(
     configureJarManifest(jarManifestAttributes)
 }
 
+private const val RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY = "mcMultiLoader.metadata.resources.pattern"
+private const val RESOURCE_EXPANDS_ATTRIBUTES_INPUT_PROPERTY = "mcMultiLoader.metadata.resources.attributes"
+private const val JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY = "mcMultiLoader.metadata.jarManifest.attributes"
+
 private fun Project.configureResources(resourcesExpands: DomainObjectSet<ResourceExpand>) {
     resourcesExpands.configureEach {
         tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
             inputs.property(RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY, patterns)
             inputs.property(RESOURCE_EXPANDS_ATTRIBUTES_INPUT_PROPERTY, attributes)
-            doFirst {
-                filesMatching(patterns.get()) {
-                    expand(attributes.get())
-                }
+            filesMatching(patterns.get()) {
+                expand(attributes.get())
             }
         }
     }
@@ -36,8 +35,6 @@ private fun Project.configureResources(resourcesExpands: DomainObjectSet<Resourc
 private fun Project.configureJarManifest(jarManifestAttributes: MapProperty<String, String>) {
     tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
         inputs.property(JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY, jarManifestAttributes)
-        doFirst {
-            manifest.attributes(jarManifestAttributes.get())
-        }
+        manifest.attributes(jarManifestAttributes.get())
     }
 }
