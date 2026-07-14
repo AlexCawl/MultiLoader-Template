@@ -15,7 +15,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
-internal fun Project.configureAccess(
+internal fun Project.accessFeature(
     fabricAccessWidener: Provider<RegularFile>,
     accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
 ) {

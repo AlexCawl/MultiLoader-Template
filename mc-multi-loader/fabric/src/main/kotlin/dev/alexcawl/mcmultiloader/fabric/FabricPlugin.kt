@@ -1,6 +1,5 @@
 package dev.alexcawl.mcmultiloader.fabric
 
-import dev.alexcawl.mcmultiloader.fabric.access.AccessConfiguration
 import dev.alexcawl.mcmultiloader.fabric.configuration.configureMmlRuntimeEmbedding
 import dev.alexcawl.mcmultiloader.fabric.configuration.fabricAccessWidenerClasspath
 import dev.alexcawl.mcmultiloader.fabric.configuration.mmlImplementation
@@ -22,11 +21,7 @@ class FabricPlugin : Plugin<Project> {
             mmlRuntimeClasspath,
         )
         val accessWideners = target.fabricAccessWidenerClasspath(mmlImplementation)
-        val accessConfiguration = AccessConfiguration.create(
-            target,
-            accessWideners,
-        )
-        val extension = target.objects.newInstance<McFabricLoaderExtensionImpl>(accessConfiguration)
+        val extension = target.objects.newInstance<McFabricLoaderExtensionImpl>(accessWideners)
         target.extensions.add<McFabricLoaderExtension>(EXTENSION_NAME, extension)
     }
 
