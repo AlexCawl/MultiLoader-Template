@@ -1,7 +1,5 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
-import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
-import dev.alexcawl.mcmultiloader.neoforge.access.AccessConfiguration
 import dev.alexcawl.mcmultiloader.neoforge.configuration.configureMmlRuntimeEmbedding
 import dev.alexcawl.mcmultiloader.neoforge.configuration.mmlImplementation
 import dev.alexcawl.mcmultiloader.neoforge.configuration.mmlRuntimeClasspath
@@ -23,11 +21,7 @@ class NeoForgePlugin : Plugin<Project> {
             mmlRuntimeClasspath,
         )
         val accessTransformers = target.neoForgeAccessTransformerClasspath(mmlImplementation)
-        val accessConfiguration = AccessConfiguration.create(
-            target,
-            accessTransformers,
-        )
-        val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(accessConfiguration)
+        val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(accessTransformers)
         target.extensions.add<McNeoForgeLoaderExtension>(EXTENSION_NAME, extension)
     }
 
