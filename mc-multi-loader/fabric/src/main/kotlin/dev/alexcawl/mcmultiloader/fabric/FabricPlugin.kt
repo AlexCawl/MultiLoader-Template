@@ -1,9 +1,10 @@
 package dev.alexcawl.mcmultiloader.fabric
 
-import dev.alexcawl.mcmultiloader.fabric.configuration.fabricAccessWidenerClasspath
-import dev.alexcawl.mcmultiloader.core.configuration.configureMergedDependencies
-import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration
 import dev.alexcawl.mcmultiloader.fabric.access.AccessConfiguration
+import dev.alexcawl.mcmultiloader.fabric.configuration.configureMmlRuntimeEmbedding
+import dev.alexcawl.mcmultiloader.fabric.configuration.fabricAccessWidenerClasspath
+import dev.alexcawl.mcmultiloader.fabric.configuration.mmlImplementation
+import dev.alexcawl.mcmultiloader.fabric.configuration.mmlRuntimeClasspath
 import dev.alexcawl.mcmultiloader.fabric.extension.McFabricLoaderExtension
 import dev.alexcawl.mcmultiloader.fabric.extension.impl.McFabricLoaderExtensionImpl
 import org.gradle.api.Plugin
@@ -14,17 +15,18 @@ import org.gradle.kotlin.dsl.newInstance
 class FabricPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        val metadataConfiguration = MetadataConfiguration.create(target)
-        val mergedDependencies = target.configureMergedDependencies()
-        val accessWideners = target.fabricAccessWidenerClasspath(mergedDependencies.dependencies)
+        val mmlImplementation = target.mmlImplementation()
+        val mmlRuntimeClasspath = target.mmlRuntimeClasspath(mmlImplementation.get())
+        target.configureMmlRuntimeEmbedding(
+            mmlImplementation,
+            mmlRuntimeClasspath,
+        )
+        val accessWideners = target.fabricAccessWidenerClasspath(mmlImplementation)
         val accessConfiguration = AccessConfiguration.create(
             target,
             accessWideners,
         )
-        val extension = target.objects.newInstance<McFabricLoaderExtensionImpl>(
-            metadataConfiguration,
-            accessConfiguration,
-        )
+        val extension = target.objects.newInstance<McFabricLoaderExtensionImpl>(accessConfiguration)
         target.extensions.add<McFabricLoaderExtension>(EXTENSION_NAME, extension)
     }
 

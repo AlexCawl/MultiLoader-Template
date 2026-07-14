@@ -1,4 +1,4 @@
-package dev.alexcawl.mcmultiloader.core.configuration2
+package dev.alexcawl.mcmultiloader.core.configuration
 
 import org.gradle.api.attributes.Attribute
 

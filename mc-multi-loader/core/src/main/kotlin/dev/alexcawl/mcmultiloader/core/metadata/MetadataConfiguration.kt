@@ -1,6 +1,7 @@
 package dev.alexcawl.mcmultiloader.core.metadata
 
 import dev.alexcawl.mcmultiloader.core.metadata.impl.MetadataConfigurationImpl
+import dev.alexcawl.mcmultiloader.core.metadata.impl.metadataFeature
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -28,8 +29,15 @@ interface MetadataConfiguration {
     }
 
     companion object {
-        fun create(project: Project): MetadataConfiguration {
-            return project.objects.newInstance<MetadataConfigurationImpl>()
+
+        fun apply(project: Project, action: Action<in MetadataConfiguration>) {
+            val configuration = project.objects.newInstance<MetadataConfigurationImpl>()
+            action.execute(configuration)
+            with(project) {
+                with(configuration) {
+                    metadataFeature(resourcesExpands, jarManifestAttributes)
+                }
+            }
         }
     }
 }

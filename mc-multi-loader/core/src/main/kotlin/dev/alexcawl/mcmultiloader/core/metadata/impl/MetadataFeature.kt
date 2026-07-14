@@ -11,7 +11,15 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
 
-internal fun Project.configureResources(resourcesExpands: DomainObjectSet<ResourceExpand>) {
+internal fun Project.metadataFeature(
+    resourcesExpands: DomainObjectSet<ResourceExpand>,
+    jarManifestAttributes: MapProperty<String, String>
+) {
+    configureResources(resourcesExpands)
+    configureJarManifest(jarManifestAttributes)
+}
+
+private fun Project.configureResources(resourcesExpands: DomainObjectSet<ResourceExpand>) {
     resourcesExpands.configureEach {
         tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
             inputs.property(RESOURCE_EXPANDS_PATTERNS_INPUT_PROPERTY, patterns)
@@ -25,11 +33,11 @@ internal fun Project.configureResources(resourcesExpands: DomainObjectSet<Resour
     }
 }
 
-internal fun Project.configureJarManifest(attributes: MapProperty<String, String>) {
+private fun Project.configureJarManifest(jarManifestAttributes: MapProperty<String, String>) {
     tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME) {
-        inputs.property(JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY, attributes)
+        inputs.property(JAR_MANIFEST_ATTRIBUTES_INPUT_PROPERTY, jarManifestAttributes)
         doFirst {
-            manifest.attributes(attributes.get())
+            manifest.attributes(jarManifestAttributes.get())
         }
     }
 }

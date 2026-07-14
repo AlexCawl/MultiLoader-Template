@@ -5,42 +5,30 @@ import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration.BuilderSco
 import dev.alexcawl.mcmultiloader.core.metadata.MetadataConfiguration.ResourceScope
 import org.gradle.api.Action
 import org.gradle.api.DomainObjectSet
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.domainObjectSet
 import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
 internal abstract class MetadataConfigurationImpl @Inject constructor(
-    private val project: Project,
     private val objects: ObjectFactory,
 ) : MetadataConfiguration {
 
+    internal val resourcesExpands: DomainObjectSet<ResourceExpand> = objects.domainObjectSet(ResourceExpand::class)
+
+    internal val jarManifestAttributes: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
+
     override fun resources(action: Action<in ResourceScope>) {
-        val resourcesExpands: DomainObjectSet<ResourceExpand> = objects.domainObjectSet(ResourceExpand::class)
         val resourceScope = objects.newInstance(ResourceScopeImpl::class, resourcesExpands)
         action.execute(resourceScope)
-        with(project) {
-            plugins.withType<JavaPlugin> {
-                configureResources(resourcesExpands)
-            }
-        }
     }
 
     override fun jarManifest(action: Action<in BuilderScope>) {
-        val jarManifestAttributes: MapProperty<String, String> = objects.mapProperty(String::class, String::class)
         val builderScope = objects.newInstance(BuilderScopeImpl::class, jarManifestAttributes)
         action.execute(builderScope)
-        with(project) {
-            plugins.withType<JavaPlugin> {
-                configureJarManifest(jarManifestAttributes)
-            }
-        }
     }
 }
 

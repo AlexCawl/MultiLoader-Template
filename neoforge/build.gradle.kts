@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    merged(project(":common"))
+    mmlImplementation(project(":common"))
 }
 
 java {

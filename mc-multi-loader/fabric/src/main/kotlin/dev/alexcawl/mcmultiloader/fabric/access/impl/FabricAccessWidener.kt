@@ -51,7 +51,7 @@ private fun FabricAccessWidener.significantLines(): List<String> = body.mapNotNu
 }
 
 private fun buildMissingLinesMessage(actualSource: String, missing: List<MissingLine>): String = buildString {
-    appendLine("Fabric access widener '$actualSource' is missing entries required by merged common artifacts:")
+    appendLine("Fabric access widener '$actualSource' is missing entries required by MML common artifacts:")
     missing.take(20).forEach { appendLine(" - ${it.source}: ${it.line}") }
     if (missing.size > 20) appendLine(" - ... ${missing.size - 20} more")
 }

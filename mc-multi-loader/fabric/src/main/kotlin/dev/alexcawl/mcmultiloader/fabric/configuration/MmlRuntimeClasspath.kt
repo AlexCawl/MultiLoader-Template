@@ -1,5 +1,6 @@
-package dev.alexcawl.mcmultiloader.core.configuration2
+package dev.alexcawl.mcmultiloader.fabric.configuration
 
+import dev.alexcawl.mcmultiloader.core.configuration.LoaderType
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencyScopeConfiguration
@@ -11,8 +12,7 @@ import org.gradle.kotlin.dsl.named
 private const val NAME = "mmlRuntimeClasspath"
 private const val DESCRIPTION = "Resolved runtime artifacts from MML dependencies."
 
-fun Project.mmlRuntimeClasspath(
-    mmlApi: DependencyScopeConfiguration,
+internal fun Project.mmlRuntimeClasspath(
     mmlImplementation: DependencyScopeConfiguration,
     usage: Usage = objects.named<Usage>(Usage.JAVA_RUNTIME),
     category: Category = objects.named<Category>(Category.LIBRARY),
@@ -26,6 +26,6 @@ fun Project.mmlRuntimeClasspath(
             attribute(Category.CATEGORY_ATTRIBUTE, category)
             attribute(LoaderType.ATTRIBUTE, loaderType)
         }
-        extendsFrom(mmlApi, mmlImplementation)
+        extendsFrom(mmlImplementation)
     }
 }
