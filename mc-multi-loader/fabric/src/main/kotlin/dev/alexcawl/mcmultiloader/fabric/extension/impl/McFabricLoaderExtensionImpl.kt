@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 internal abstract class McFabricLoaderExtensionImpl @Inject constructor(
     private val project: Project,
-    private val accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
+    private val fabricAccessWidenerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
 ) : McFabricLoaderExtension {
 
     override fun metadata(action: Action<in MetadataConfiguration>) {
@@ -19,6 +19,6 @@ internal abstract class McFabricLoaderExtensionImpl @Inject constructor(
     }
 
     override fun access(action: Action<in AccessConfiguration>) {
-        AccessConfiguration.apply(project, action, accessWideners)
+        AccessConfiguration.apply(project, action, fabricAccessWidenerClasspath)
     }
 }

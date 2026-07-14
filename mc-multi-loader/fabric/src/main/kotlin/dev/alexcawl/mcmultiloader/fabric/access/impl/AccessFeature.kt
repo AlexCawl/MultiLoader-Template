@@ -1,60 +1,66 @@
 package dev.alexcawl.mcmultiloader.fabric.access.impl
 
-import dev.alexcawl.mcmultiloader.fabric.access.impl.AccessConstants.TASK_GROUP
-import dev.alexcawl.mcmultiloader.fabric.access.impl.AccessConstants.VALIDATION_MARKER
-import dev.alexcawl.mcmultiloader.fabric.access.impl.AccessConstants.VALIDATION_TASK_NAME
+import dev.alexcawl.mcmultiloader.fabric.FabricPlugin.Companion.VALIDATE_FABRIC_ACCESS_WIDENER_TASK_GROUP
+import dev.alexcawl.mcmultiloader.fabric.FabricPlugin.Companion.VALIDATE_FABRIC_ACCESS_WIDENER_TASK_NAME
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ArtifactView
 import org.gradle.api.artifacts.ResolvableConfiguration
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
-internal fun Project.accessFeature(
-    fabricAccessWidener: Provider<RegularFile>,
-    accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
-) {
-    val validation = registerAccessWidenerValidation(
-        fabricAccessWidener,
-        accessWideners,
-    )
+private const val ACCESS_WIDENER_ARTIFACT_TYPE = "access-widener"
 
-    plugins.withType(JavaPlugin::class.java).configureEach {
+internal fun Project.accessFeature(
+    fabricAccessWidener: RegularFileProperty,
+    fabricAccessWidenerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
+) {
+    val validateFabricAccessWidener = validateFabricAccessWidener(fabricAccessWidener, fabricAccessWidenerClasspath)
+    plugins.withType<JavaPlugin> {
         tasks.named(JavaPlugin.CLASSES_TASK_NAME) {
-            dependsOn(validation)
+            dependsOn(validateFabricAccessWidener)
         }
         tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
-            dependsOn(validation)
+            dependsOn(validateFabricAccessWidener)
         }
     }
-    plugins.withType(LoomGradlePluginBootstrap::class.java).configureEach {
-        val loom = extensions.getByType(LoomGradleExtensionAPI::class.java)
-        loom.mixin.useLegacyMixinAp.set(false)
-        loom.accessWidenerPath.set(fabricAccessWidener)
+    plugins.withType<LoomGradlePluginBootstrap> {
+        val loomExtension = extensions.getByType<LoomGradleExtensionAPI>()
+        loomExtension.mixin.useLegacyMixinAp.set(false)
+        loomExtension.accessWidenerPath.set(fabricAccessWidener)
     }
 }
 
-private fun Project.registerAccessWidenerValidation(
+private fun Project.validateFabricAccessWidener(
     fabricAccessWidener: Provider<RegularFile>,
-    accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
-): TaskProvider<ValidateFabricAccessWidenerTask> = tasks.register(
-    VALIDATION_TASK_NAME,
-    ValidateFabricAccessWidenerTask::class.java,
-) {
-    group = TASK_GROUP
-    loaderAccessWidener.set(fabricAccessWidener)
-    this.accessWideners.from(accessWideners.lenientArtifactFiles())
-    validationMarker.set(layout.buildDirectory.file(VALIDATION_MARKER))
+    fabricAccessWidenerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
+): TaskProvider<ValidateFabricAccessWidenerTask> {
+    return tasks.register<ValidateFabricAccessWidenerTask>(VALIDATE_FABRIC_ACCESS_WIDENER_TASK_NAME) {
+        group = VALIDATE_FABRIC_ACCESS_WIDENER_TASK_GROUP
+        loaderAccessWidener.set(fabricAccessWidener)
+        accessWideners.from(fabricAccessWidenerClasspath.accessWideners())
+    }
 }
 
-private fun NamedDomainObjectProvider<ResolvableConfiguration>.lenientArtifactFiles(): Provider<FileCollection> =
-    map { configuration ->
-        configuration.incoming.artifactView {
+private fun NamedDomainObjectProvider<ResolvableConfiguration>.accessWideners(): Provider<FileCollection> {
+    return map { configuration: ResolvableConfiguration ->
+        val accessWideners: ArtifactView = configuration.incoming.artifactView {
             isLenient = true
-        }.files
+            attributes {
+                attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, ACCESS_WIDENER_ARTIFACT_TYPE)
+            }
+        }
+        accessWideners.files
     }
+}

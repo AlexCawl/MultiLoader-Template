@@ -21,13 +21,13 @@ interface AccessConfiguration {
         fun apply(
             project: Project,
             action: Action<in AccessConfiguration>,
-            accessWideners: NamedDomainObjectProvider<ResolvableConfiguration>,
+            fabricAccessWidenerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
         ) {
             val configuration = project.objects.newInstance<AccessConfigurationImpl>()
             action.execute(configuration)
             with(project) {
                 with(configuration) {
-                    accessFeature(fabricAccessWidener, accessWideners)
+                    accessFeature(fabricAccessWidener, fabricAccessWidenerClasspath)
                 }
             }
         }

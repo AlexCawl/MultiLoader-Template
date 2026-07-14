@@ -26,7 +26,8 @@ internal fun validateFabricAccessWidener(
     actual: FabricAccessWidener,
     expected: List<FabricAccessWidener>,
 ) {
-    expected.firstOrNull { it.header != actual.header }?.let { mismatch ->
+    val required = expected.filter(FabricAccessWidener::hasAccessEntries)
+    required.firstOrNull { it.header != actual.header }?.let { mismatch ->
         throw GradleException(
             "Fabric access widener header mismatch in '${mismatch.source}': " +
                 "expected '${actual.header}', found '${mismatch.header}'."
@@ -34,7 +35,7 @@ internal fun validateFabricAccessWidener(
     }
 
     val actualLines = actual.significantLines().toSet()
-    val missing = expected.flatMap { accessWidener ->
+    val missing = required.flatMap { accessWidener ->
         accessWidener.significantLines()
             .filterNot(actualLines::contains)
             .map { MissingLine(accessWidener.source, it) }
@@ -45,6 +46,8 @@ internal fun validateFabricAccessWidener(
 }
 
 private fun isHeader(line: String): Boolean = line.trim().let { it.isNotEmpty() && !it.startsWith("#") }
+
+internal fun FabricAccessWidener.hasAccessEntries(): Boolean = significantLines().isNotEmpty()
 
 private fun FabricAccessWidener.significantLines(): List<String> = body.mapNotNull { line ->
     line.trim().takeIf { it.isNotEmpty() && !it.startsWith("#") }

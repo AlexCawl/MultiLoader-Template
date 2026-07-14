@@ -4,11 +4,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -16,7 +14,6 @@ import org.gradle.api.tasks.TaskAction
 private const val CONFIGURE_ACCESS_WIDENER_ERROR =
     "Fabric access widener must be configured with mcFabricLoader.access.fabricAccessWidener(...)."
 
-@CacheableTask
 abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
 
     @get:InputFile
@@ -24,14 +21,19 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val loaderAccessWidener: RegularFileProperty
 
-    @get:Classpath
+    @get:InputFiles
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val accessWideners: ConfigurableFileCollection
-
-    @get:OutputFile
-    abstract val validationMarker: RegularFileProperty
 
     @TaskAction
     fun validate() {
+        val expected = accessWideners.files
+            .map { readFabricAccessWidener(it.name, it.readText()) }
+            .filter(FabricAccessWidener::hasAccessEntries)
+            .distinctBy { it.header to it.body }
+        if (expected.isEmpty()) return
+
         if (!loaderAccessWidener.isPresent) throw GradleException(CONFIGURE_ACCESS_WIDENER_ERROR)
 
         val loaderFile = loaderAccessWidener.get().asFile
@@ -40,15 +42,6 @@ abstract class ValidateFabricAccessWidenerTask : DefaultTask() {
         }
 
         val actual = readFabricAccessWidener(loaderFile.name, loaderFile.readText())
-        val variantExpected = accessWideners.files
-            .filter { it.isFile && it.extension != "jar" }
-            .map { readFabricAccessWidener(it.name, it.readText()) }
-        val expected = variantExpected.distinctBy { it.header to it.body }
         validateFabricAccessWidener(actual, expected)
-
-        validationMarker.get().asFile.apply {
-            parentFile.mkdirs()
-            writeText("ok\n")
-        }
     }
 }
