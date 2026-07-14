@@ -9,7 +9,7 @@ import org.gradle.api.artifacts.ConsumableConfiguration
 import org.gradle.api.artifacts.DependencyScopeConfiguration
 import org.gradle.api.file.RegularFileProperty
 
-private const val OUTGOING_ACCESS_TRANSFORMER_TYPE = "access-tranformer"
+private const val OUTGOING_ACCESS_TRANSFORMER_TYPE = "access-transformer"
 private const val OUTGOING_ACCESS_TRANSFORMER_EXTENSION = "cfg"
 
 internal fun Project.neoForgeAccessTransformerElements(

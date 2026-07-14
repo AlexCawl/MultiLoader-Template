@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 internal abstract class McNeoForgeLoaderExtensionImpl @Inject constructor(
     private val project: Project,
-    private val accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
+    private val neoForgeAccessTransformerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
 ) : McNeoForgeLoaderExtension {
 
     override fun metadata(action: Action<in MetadataConfiguration>) {
@@ -19,6 +19,6 @@ internal abstract class McNeoForgeLoaderExtensionImpl @Inject constructor(
     }
 
     override fun access(action: Action<in AccessConfiguration>) {
-        AccessConfiguration.apply(project, action, accessTransformers)
+        AccessConfiguration.apply(project, action, neoForgeAccessTransformerClasspath)
     }
 }

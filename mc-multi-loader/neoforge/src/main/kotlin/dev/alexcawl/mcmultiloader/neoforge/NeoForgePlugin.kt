@@ -1,6 +1,7 @@
 package dev.alexcawl.mcmultiloader.neoforge
 
-import dev.alexcawl.mcmultiloader.neoforge.configuration.configureMmlRuntimeEmbedding
+import dev.alexcawl.mcmultiloader.neoforge.configuration.configureMmlImplementation
+import dev.alexcawl.mcmultiloader.neoforge.configuration.configureMmlRuntimeClasspath
 import dev.alexcawl.mcmultiloader.neoforge.configuration.mmlImplementation
 import dev.alexcawl.mcmultiloader.neoforge.configuration.mmlRuntimeClasspath
 import dev.alexcawl.mcmultiloader.neoforge.configuration.neoForgeAccessTransformerClasspath
@@ -15,13 +16,11 @@ class NeoForgePlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         val mmlImplementation = target.mmlImplementation()
-        val mmlRuntimeClasspath = target.mmlRuntimeClasspath(mmlImplementation.get())
-        target.configureMmlRuntimeEmbedding(
-            mmlImplementation,
-            mmlRuntimeClasspath,
-        )
-        val accessTransformers = target.neoForgeAccessTransformerClasspath(mmlImplementation)
-        val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(accessTransformers)
+        target.configureMmlImplementation(mmlImplementation)
+        val mmlRuntimeClasspath = target.mmlRuntimeClasspath(mmlImplementation)
+        target.configureMmlRuntimeClasspath(mmlRuntimeClasspath)
+        val neoForgeAccessTransformerClasspath = target.neoForgeAccessTransformerClasspath(mmlImplementation)
+        val extension = target.objects.newInstance<McNeoForgeLoaderExtensionImpl>(neoForgeAccessTransformerClasspath)
         target.extensions.add<McNeoForgeLoaderExtension>(EXTENSION_NAME, extension)
     }
 

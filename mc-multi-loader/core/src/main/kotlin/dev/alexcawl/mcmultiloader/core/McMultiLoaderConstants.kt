@@ -16,9 +16,6 @@ object McMultiLoaderConstants {
 
         const val FABRIC_ACCESS_WIDENER_CLASSPATH_DESCRIPTION = "Fabric access wideners resolved from MML dependencies."
 
-        const val NEOFORGE_ACCESS_TRANSFORMER_CLASSPATH = "neoForgeAccessTransformerClasspath"
 
-        const val NEOFORGE_ACCESS_TRANSFORMER_CLASSPATH_DESCRIPTION =
-            "NeoForge access transformers resolved from MML dependencies."
     }
 }

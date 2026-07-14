@@ -21,13 +21,13 @@ interface AccessConfiguration {
         fun apply(
             project: Project,
             action: Action<in AccessConfiguration>,
-            accessTransformers: NamedDomainObjectProvider<ResolvableConfiguration>,
+            neoForgeAccessTransformerClasspath: NamedDomainObjectProvider<ResolvableConfiguration>,
         ) {
             val configuration = project.objects.newInstance<AccessConfigurationImpl>()
             action.execute(configuration)
             with(project) {
                 with(configuration) {
-                    accessFeature(neoForgeAccessTransformer, accessTransformers)
+                    accessFeature(neoForgeAccessTransformer, neoForgeAccessTransformerClasspath)
                 }
             }
         }
